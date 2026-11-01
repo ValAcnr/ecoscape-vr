@@ -20,12 +20,12 @@ export default function Compare() {
 
   // Make sure the embedded mobile app has a neighbourhood and is standing next to the demo mission.
   useEffect(() => {
-    if (s.onboarded && s.hoodId === 'belleville' && s.player) { setReady(true); return }
+    if (s.onboarded && s.hoodId === 'belleville' && s.player && s.activeMissionId === 'belleville-m1') { setReady(true); return }
     loadHood('belleville').then((h) => {
       const m = h.missions[0]
       // Seed one demo planting (same spot as the VR scene) so the 'Unlock & follow' step is not empty
       const demo = s.plantings.length ? {} : { plantings: [{ id: 'pl-demo', missionId: m.id, hoodId: 'belleville', type: 'flowers' as const, plantId: 'knautia', plantName: 'Field scabious', latin: 'Knautia arvensis', name: 'Bee Corner Parmentier', lat: m.lat, lon: m.lon, addr: m.addr, partner: city('paris').demoPartners[0], score: 85, createdAt: Date.now() }], monthsAhead: 3 }
-      set({ onboarded: true, city: 'paris', hoodId: 'belleville', player: [m.lat - 0.00012, m.lon], ...demo })
+      set({ onboarded: true, city: 'paris', hoodId: 'belleville', player: [m.lat - 0.00012, m.lon], activeMissionId: m.id, ...demo })
       setTimeout(() => setReady(true), 50)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps

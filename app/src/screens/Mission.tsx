@@ -17,19 +17,25 @@ export default function Mission() {
   const [hood, setHood] = useState<Hood | null>(null)
   const [step, setStep] = useState(0)
   // scores
-  const [pick, setPick] = useState<{ tries: string[]; done: boolean }>({ tries: [], done: false })
+  // Step 1: tap a plant to select it, then "Plant it here" checks the choice.
+  const [selected, setSelected] = useState<string | null>(null)
+  const [wrong, setWrong] = useState<string[]>([])
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
+  const [found, setFound] = useState(false)
   const [waterScore, setWaterScore] = useState<number | null>(null)
   const [care, setCare] = useState<string[]>([])
   const [careDone, setCareDone] = useState(false)
 
   useEffect(() => { if (s.hoodId) loadHood(s.hoodId).then(setHood) }, [s.hoodId])
+  useEffect(() => { if (id && s.activeMissionId !== id) set({ activeMissionId: id }) }, [id, s.activeMissionId, set])
   const mission = hood?.missions.find((m) => m.id === id)
   const game = useMemo(() => (mission ? candidates(mission) : null), [mission])
   if (!hood || !mission || !game) return <div className="screen pad">Loading mission…</div>
   const type = missionType(mission)
   const correct = game.options.find((p) => p.id === game.correctId)!
 
-  const choosePts = pick.done ? (pick.tries.length === 1 ? 40 : pick.tries.length === 2 ? 20 : 0) : 0
+  // 40 pts first try, 30 second, 20 third: a wrong pick costs points but never makes the mission impossible
+  const choosePts = found ? 40 - 10 * wrong.length : 0
   const acts = careActions(type)
   const carePts = careDone ? Math.max(0, acts.reduce((n, a) => n + (care.includes(a.id) ? (a.good ? 12.5 : -12.5) : 0), 0)) : 0
   const total = Math.round(choosePts + (waterScore ?? 0) + carePts)
@@ -73,26 +79,40 @@ export default function Mission() {
           <h2>Which one will thrive here?</h2>
           <Conditions m={mission} />
           {game.options.map((p) => {
-            const tried = pick.tries.includes(p.id)
-            const isRight = p.id === game.correctId
-            const cls = tried ? (isRight ? 'right' : 'wrong') : ''
+            const isWrong = wrong.includes(p.id)
+            const isSel = selected === p.id
             return (
-              <button key={p.id} className={`option ${cls}`} disabled={pick.done || tried} onClick={() => setPick((x) => ({ tries: [...x.tries, p.id], done: isRight }))}>
+              <button key={p.id} type="button" className={`option ${isWrong ? 'wrong' : ''}`} aria-pressed={isSel} disabled={isWrong}
+                style={isSel ? { background: 'var(--honey)', boxShadow: 'var(--shadow)' } : undefined}
+                onClick={() => { setSelected(p.id); setFeedback(null) }}>
                 <PlantArt type={type} stage={3} w={64} label={p.common} />
                 <div>
-                  <div className="row between"><h3>{p.common}</h3>{tried && (isRight ? <Check size={20} /> : <X size={20} />)}</div>
+                  <div className="row between"><h3>{p.common}</h3>{isWrong ? <X size={20} aria-label="Does not fit" /> : isSel ? <span className="pill-tag">SELECTED</span> : null}</div>
                   <div className="small muted"><i>{p.latin}</i></div>
                   <div className="row wrap" style={{ gap: 4, marginTop: 6 }}>
                     {p.exposure.map((e) => <span key={e} className={`chip ${e}`} style={{ fontSize: 11, padding: '2px 7px' }}>{EXPOSURE_LABEL[e]}</span>)}
                     {p.soil.map((e) => <span key={e} className="chip" style={{ fontSize: 11, padding: '2px 7px' }}>{SOIL_LABEL[e]}</span>)}
                   </div>
-                  {tried && <p className="small" style={{ marginTop: 6 }}>{explain(p, mission)}</p>}
+                  {isWrong && <p className="small" style={{ marginTop: 6 }}>{explain(p, mission)}</p>}
                 </div>
               </button>
             )
           })}
           <p className="small muted">{type === 'tree' ? 'Tree data: City of Paris tree-species guide (open data).' : 'Simplified for the game. Charter: local, bee-friendly plants only.'}</p>
-          <button className="btn primary block" disabled={!pick.done} onClick={() => setStep(2)}>Plant it — next: watering</button>
+          {feedback && (
+            <div role="alert" className="card" style={{ background: feedback.ok ? '#c8efda' : '#ffd3dd' }}>
+              <p style={{ fontWeight: 700 }}>{feedback.ok ? '✓ ' : '✗ '}{feedback.text}</p>
+            </div>
+          )}
+          <button type="button" className="btn primary block" onClick={() => {
+            if (!selected) return setFeedback({ ok: false, text: 'Tap one of the plants above to select it first.' })
+            const p = game.options.find((o) => o.id === selected)!
+            if (p.id === game.correctId) { setFound(true); setFeedback(null); setStep(2); return }
+            const left = game.options.length - wrong.length - 2
+            setWrong((w) => [...w, p.id])
+            setSelected(null)
+            setFeedback({ ok: false, text: `Not this one: ${explain(p, mission)} ${left > 0 ? `Try another plant (${left + 1} left).` : 'Only one plant left — it is the one that fits this spot.'}` })
+          }}>{selected ? `Plant ${game.options.find((o) => o.id === selected)?.common} here` : 'Plant it here'}</button>
         </div>
       )}
 
@@ -133,12 +153,24 @@ export default function Mission() {
           ) : (
             <>
               <h2>Almost! {PASS} needed.</h2>
-              <p>Plants are living things — try again, you'll get it. Tip: read the spot's sun and soil first.</p>
+              <div className="card" style={{ textAlign: 'left' }}>
+                {[['Right plant', choosePts, 40], ['Watering', waterScore ?? 0, 35], ['Soil care', Math.round(carePts), 25]].map(([k, v, max]) => (
+                  <div key={k as string} className="row between small" style={{ padding: '3px 0' }}><span>{k}</span><b>{v}/{max}</b></div>
+                ))}
+              </div>
+              <p>{(waterScore ?? 0) < 25
+                ? 'Your plant is in the right spot — the watering was off. Keep the blue level inside the green zone: tap a little and often.'
+                : carePts < 25 ? 'Look again at the care actions: no pesticides, no plastic.' : 'So close — try once more.'}</p>
             </>
           )}
-          <div className="row" style={{ justifyContent: 'center' }}>
-            <button className="btn" onClick={() => { setStep(1); setPick({ tries: [], done: false }); setWaterScore(null); setCare([]); setCareDone(false) }}><RotateCcw size={16} /> Try again</button>
-            <button className="btn primary" onClick={() => nav('/map')}>Back to map</button>
+          <div className="stack" style={{ gap: 8 }}>
+            {total < PASS && found && (
+              <button className="btn honey block" onClick={() => { setWaterScore(null); setCare([]); setCareDone(false); setStep(2) }}><RotateCcw size={16} /> Retry watering (keep {correct.common})</button>
+            )}
+            <div className="row" style={{ justifyContent: 'center' }}>
+              <button className="btn" onClick={() => { setStep(1); setSelected(null); setWrong([]); setFound(false); setFeedback(null); setWaterScore(null); setCare([]); setCareDone(false) }}><RotateCcw size={16} /> Restart mission</button>
+              <button className="btn primary" onClick={() => nav('/map')}>Back to map</button>
+            </div>
           </div>
         </div>
       )}
@@ -183,7 +215,7 @@ function Water({ m, plant, onDone }: { m: M; plant: Plant; onDone: (pts: number)
 
   useEffect(() => {
     if (!running) return
-    const dryRate = m.heat >= 3 ? 1.9 : m.heat === 2 ? 1.6 : 1.3 // hotter spots dry faster
+    const dryRate = m.heat >= 3 ? 1.0 : m.heat === 2 ? 0.85 : 0.7 // hotter spots dry faster (per 100 ms)
     const iv = setInterval(() => {
       ticks.current++
       const next = Math.max(0, lv.current - dryRate)
@@ -197,13 +229,13 @@ function Water({ m, plant, onDone }: { m: M; plant: Plant; onDone: (pts: number)
   useEffect(() => {
     if (running && t >= WATER_SECONDS) {
       setRunning(false)
-      onDone(Math.round((inBand.current / Math.max(1, ticks.current)) * 35))
+      onDone(Math.round(Math.min(1, inBand.current / Math.max(1, ticks.current) / 0.75) * 35)) // 75% of the time in the zone = full marks
     }
   }, [t, running, onDone])
 
   const water = () => {
     if (!running) setRunning(true)
-    setLevel((x) => Math.min(100, x + 9))
+    setLevel((x) => Math.min(100, x + 10))
   }
   const pct = ticks.current ? Math.round((inBand.current / ticks.current) * 100) : 0
   return (

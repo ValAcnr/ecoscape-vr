@@ -32,6 +32,8 @@ export interface GameState {
   likes: string[]
   /** Demo time-travel for the follow-up screen (months after unlock). */
   monthsAhead: number
+  /** Mission last opened (mobile) — the VR mini-game plays the same one. */
+  activeMissionId: string | null
 }
 
 const KEY = 'ecoscape-state-v1'
@@ -48,6 +50,7 @@ const fresh = (): GameState => ({
   shares: 0,
   likes: [],
   monthsAhead: 0,
+  activeMissionId: null,
 })
 
 function load(): GameState {
@@ -78,6 +81,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
   }, [s])
+  // Keep every open copy of the app in sync (other tabs, and the two iframes of /compare):
+  // when another copy saves, adopt its state instead of overwriting it later with a stale one.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || !e.newValue) return
+      try { setS({ ...fresh(), ...JSON.parse(e.newValue) }) } catch { /* ignore malformed */ }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
   const set = useCallback<Ctx['set']>((patch) => setS((prev) => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) })), [])
   const reset = useCallback(() => setS(fresh()), [])
   const addBadge = useCallback((b: string) => setS((p) => (p.badges.includes(b) ? p : { ...p, badges: [...p.badges, b] })), [])
