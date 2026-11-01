@@ -54,14 +54,17 @@ export default function MapScreen() {
       center: [player[1], player[0]],
       zoom: 15.4,
       attributionControl: { compact: true },
-      maxBounds: [[hood.bbox[1] - 0.01, hood.bbox[0] - 0.007], [hood.bbox[3] + 0.01, hood.bbox[2] + 0.007]],
+      maxBounds: [[hood.bbox[1] - 0.03, hood.bbox[0] - 0.02], [hood.bbox[3] + 0.03, hood.bbox[2] + 0.02]],
     })
     map.current = m
+    ;(window as unknown as { __ecoMap?: maplibregl.Map }).__ecoMap = m // debug/screenshot hook
     m.on('load', () => {
       // Frame all missions + the player so every mission is reachable at a glance
       const pts = [...hood.missions.map((x) => [x.lon, x.lat] as [number, number]), [player[1], player[0]] as [number, number]]
       const b = pts.reduce((bb, p) => bb.extend(p), new maplibregl.LngLatBounds(pts[0], pts[0]))
-      m.fitBounds(b, { padding: { top: 160, bottom: 120, left: 56, right: 56 }, duration: 0, maxZoom: 16.2 })
+      const frame = () => m.fitBounds(b, { padding: { top: 160, bottom: 120, left: 56, right: 56 }, duration: 0, maxZoom: 16.2 })
+      frame()
+      m.once('idle', () => { m.resize(); frame() }) // re-frame once the container has its final size
       m.addSource('heat', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.heat.map((h) => ({ type: 'Feature', properties: { level: h.level }, geometry: { type: 'Polygon', coordinates: [[...h.poly, h.poly[0]]] } })) } })
       m.addLayer({ id: 'heat', type: 'fill', source: 'heat', paint: { 'fill-color': '#ff6f91', 'fill-opacity': ['interpolate', ['linear'], ['get', 'level'], 1, 0.16, 3, 0.42] } })
       m.addSource('cool', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.cool.map((c) => ({ type: 'Feature', properties: { name: c.name }, geometry: c.geom })) } as GeoJSON.FeatureCollection })
