@@ -1,0 +1,46 @@
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter, Arial, sans-serif","fontSize":"15px","primaryColor":"#ffffff","primaryBorderColor":"#1f4d3a","primaryTextColor":"#14231c","lineColor":"#4f7d5c","clusterBkg":"#f4f1e8","clusterBorder":"#c9c2ad"}}}%%
+flowchart TB
+  subgraph Players["1 · Players — one web address, any device"]
+    direction LR
+    M["Smartphone browser<br/>Android · iOS"]
+    D["Desktop browser<br/>3D mouse mode"]
+    Q["Meta Quest<br/>WebXR immersive VR"]
+  end
+
+  subgraph Client["2 · Web client — React, single codebase"]
+    direction LR
+    MAP["Mobile-web experience<br/>MapLibre GL JS map"]
+    UI["Shared game logic<br/>missions · mini-game<br/>4-planting counter · feed"]
+    XR["VR premium experience<br/>React Three Fiber + WebXR"]
+  end
+
+  subgraph Data["Open data — pre-processed per neighbourhood"]
+    direction TB
+    OSM["OpenStreetMap / OpenFreeMap<br/>base map · buildings"]
+    PAR["Paris Data / NYC Open Data<br/>trees · species · permits · heat index"]
+    LCZ["Cerema LCZ<br/>heat zones"]
+  end
+
+  subgraph Backend["3 · Back-end — production target (described, not built)"]
+    direction LR
+    API["API<br/>accounts · scores · orders · moderation"]
+    DB[("PostgreSQL + PostGIS")]
+    OBJ[("Photo storage")]
+  end
+
+  subgraph Partners["4 · Partners"]
+    direction LR
+    PP["Partner portal<br/>associations plant &amp; confirm<br/>with geotagged photos"]
+    SD["Sponsor dashboard<br/>funded plantings · impact"]
+  end
+
+  Players --> Client
+  Data --> Client
+  MAP --- UI --- XR
+  Client -- "mission passed" --> API
+  API --- DB
+  API --- OBJ
+  API -- "planting order" --> PP
+  PP -- "planted + photos" --> API
+  API --> SD
+  API -. "status &amp; follow-up" .-> Client
