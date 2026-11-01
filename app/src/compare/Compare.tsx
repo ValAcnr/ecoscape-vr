@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CONFIG } from '../config'
+import { CONFIG, city } from '../config'
 import { loadHood } from '../data/hoods'
 import { useGame } from '../state'
 import { Logo } from '../components/Art'
@@ -23,7 +23,9 @@ export default function Compare() {
     if (s.onboarded && s.hoodId === 'belleville' && s.player) { setReady(true); return }
     loadHood('belleville').then((h) => {
       const m = h.missions[0]
-      set({ onboarded: true, city: 'paris', hoodId: 'belleville', player: [m.lat - 0.00012, m.lon] })
+      // Seed one demo planting (same spot as the VR scene) so the 'Unlock & follow' step is not empty
+      const demo = s.plantings.length ? {} : { plantings: [{ id: 'pl-demo', missionId: m.id, hoodId: 'belleville', type: 'flowers' as const, plantId: 'knautia', plantName: 'Field scabious', latin: 'Knautia arvensis', name: 'Bee Corner Parmentier', lat: m.lat, lon: m.lon, addr: m.addr, partner: city('paris').demoPartners[0], score: 85, createdAt: Date.now() }], monthsAhead: 3 }
+      set({ onboarded: true, city: 'paris', hoodId: 'belleville', player: [m.lat - 0.00012, m.lon], ...demo })
       setTimeout(() => setReady(true), 50)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps

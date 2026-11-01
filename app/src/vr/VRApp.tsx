@@ -115,7 +115,7 @@ function Hub({ go }: { go: (s: Scene) => void }) {
         <Label size={0.06} position={[0, 0.14, 0]} maxWidth={1.45}>Learn to care for a plant. Earn a real one on your street.</Label>
         <Chip label={`${c.label} · Belleville`} color={C.honey} position={[-0.3, 0, 0]} w={0.5} />
         <Chip label="Up to 4 real plantings" color={C.lilac} position={[0.32, 0, 0]} w={0.56} />
-        <Button3D label="Explore my neighbourhood" w={1.0} position={[0, -0.27, 0]} onClick={() => go('hood')} />
+        <Button3D label="Explore my neighbourhood" w={1.2} position={[0, -0.27, 0]} onClick={() => go('hood')} />
       </Panel>
       <Float speed={2} floatIntensity={0.3}><Plant3D type="flowers" scale={1.4} position={[-1.25, 0.9, -1.6]} /></Float>
       <Float speed={1.6} floatIntensity={0.3}><Plant3D type="edible" scale={1.3} position={[1.25, 0.9, -1.6]} /></Float>

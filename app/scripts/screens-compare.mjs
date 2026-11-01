@@ -9,10 +9,10 @@ const p = await (await b.newContext({ viewport: { width: 1440, height: 980 } }))
 const errs = []; p.on('pageerror', (e) => errs.push(e.message))
 await p.goto(BASE); await p.evaluate(() => localStorage.clear())
 await p.goto(`${BASE}#/compare`); await p.reload(); await p.waitForTimeout(9000)
-await p.screenshot({ path: `${OUT}/01-compare-explore.png` })
-for (const [i, name] of [[0, 'discover'], [2, 'learn'], [3, 'unlock']]) {
+await p.screenshot({ path: `${OUT}/02-compare-explore.png` })
+for (const [i, name, n] of [[0, 'discover', 1], [2, 'learn', 3], [3, 'unlock', 4]]) {
   await p.locator('nav[aria-label="Journey step"] button').nth(i).click(); await p.waitForTimeout(8000)
-  await p.screenshot({ path: `${OUT}/0${i + 2}-compare-${name}.png` })
+  await p.screenshot({ path: `${OUT}/0${n}-compare-${name}.png` })
 }
 console.log('errors', errs.length ? errs : 'none')
 await b.close()
