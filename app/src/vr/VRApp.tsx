@@ -82,7 +82,7 @@ export default function VRApp() {
 /** Non-XR camera framing per scene (in the headset the user just looks around). */
 const VIEWS: Record<Scene, { pos: [number, number, number]; target: [number, number, number] }> = {
   hub: { pos: [0, 1.65, 1.1], target: [0, 1.3, -1.6] },
-  hood: { pos: [0, 2.15, -0.35], target: [0, 1.05, -1.95] },
+  hood: { pos: [0, 2.05, 0.35], target: [0, 1.3, -2.05] },
   game: { pos: [0, 1.6, 0.75], target: [0, 1.25, -1.6] },
   unlock: { pos: [0, 1.6, 0.9], target: [0, 1.35, -1.8] },
 }
@@ -141,7 +141,7 @@ function Hood({ go }: { go: (s: Scene) => void }) {
         </group>
       </group>
       <Panel w={1.5} h={0.62} position={[0, 1.78, -2.55]} rotation={[0.12, 0, 0]}>
-        <Label font="display" size={0.085} position={[0, 0.2, 0]}>Belleville — real buildings, real trees</Label>
+        <Label font="display" size={0.072} position={[0, 0.2, 0]}>Belleville — real buildings, real trees</Label>
         <Chip label="Hot spot" color={C.petal} position={[-0.45, 0.07, 0]} w={0.28} />
         <Chip label="Street trees" color="#9be2b9" position={[-0.1, 0.07, 0]} w={0.34} />
         <Chip label="Mission" color={C.honey} position={[0.24, 0.07, 0]} w={0.26} />

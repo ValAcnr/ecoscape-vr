@@ -98,7 +98,7 @@ export function Neighbourhood({ heatOn = true }: { heatOn?: boolean }) {
   }, [trees])
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]}><planeGeometry args={[540, 400]} /><meshStandardMaterial color="#e9e2d0" /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]}><circleGeometry args={[305, 64]} /><meshStandardMaterial color="#e9e2d0" /></mesh>
       {heatOn && heat.map((h, i) => (
         <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[h.x, 0.3, h.z]}><planeGeometry args={[h.w, h.d]} /><meshBasicMaterial color={C.petal} transparent opacity={0.18 + h.level * 0.12} /></mesh>
       ))}
