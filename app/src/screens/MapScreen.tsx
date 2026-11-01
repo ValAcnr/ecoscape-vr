@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+// MapLibre v6 runs tiles in a module worker: give Vite's bundled URL explicitly.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Box, Footprints, LocateFixed, Play, X } from 'lucide-react'
 import { CONFIG } from '../config'
 import { distM, loadHood, walkMin, type Hood, type Mission } from '../data/hoods'
@@ -11,6 +13,7 @@ import { useGame } from '../state'
 import { Tabs } from '../components/Shell'
 import { PlantArt } from '../components/Art'
 
+maplibregl.setWorkerUrl(workerUrl)
 const STYLE = 'https://tiles.openfreemap.org/styles/positron'
 const TYPE_ICON = { flowers: '🌼', edible: '🍅', tree: '🌳' } as const
 
@@ -55,12 +58,16 @@ export default function MapScreen() {
     })
     map.current = m
     m.on('load', () => {
+      // Frame all missions + the player so every mission is reachable at a glance
+      const pts = [...hood.missions.map((x) => [x.lon, x.lat] as [number, number]), [player[1], player[0]] as [number, number]]
+      const b = pts.reduce((bb, p) => bb.extend(p), new maplibregl.LngLatBounds(pts[0], pts[0]))
+      m.fitBounds(b, { padding: { top: 160, bottom: 120, left: 56, right: 56 }, duration: 0, maxZoom: 16.2 })
       m.addSource('heat', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.heat.map((h) => ({ type: 'Feature', properties: { level: h.level }, geometry: { type: 'Polygon', coordinates: [[...h.poly, h.poly[0]]] } })) } })
       m.addLayer({ id: 'heat', type: 'fill', source: 'heat', paint: { 'fill-color': '#ff6f91', 'fill-opacity': ['interpolate', ['linear'], ['get', 'level'], 1, 0.16, 3, 0.42] } })
       m.addSource('cool', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.cool.map((c) => ({ type: 'Feature', properties: { name: c.name }, geometry: c.geom })) } as GeoJSON.FeatureCollection })
       m.addLayer({ id: 'cool', type: 'fill', source: 'cool', paint: { 'fill-color': '#2fa36b', 'fill-opacity': 0.28 } })
       m.addSource('trees', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.trees.map((t) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [t[1], t[0]] } })) } })
-      m.addLayer({ id: 'trees', type: 'circle', source: 'trees', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 1.2, 18, 4], 'circle-color': '#2fa36b', 'circle-opacity': 0.55 } })
+      m.addLayer({ id: 'trees', type: 'circle', source: 'trees', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 1.8, 18, 4.5], 'circle-color': '#2fa36b', 'circle-opacity': 0.6 } })
       m.addSource('permits', { type: 'geojson', data: { type: 'FeatureCollection', features: hood.permits.map((p) => ({ type: 'Feature', properties: { type: p.type, addr: p.addr }, geometry: { type: 'Point', coordinates: [p.p[1], p.p[0]] } })) } })
       m.addLayer({ id: 'permits', type: 'circle', source: 'permits', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 3, 18, 7], 'circle-color': '#b9a4ff', 'circle-stroke-color': '#161320', 'circle-stroke-width': 1.5 } })
       m.addSource('range', { type: 'geojson', data: circle(player, CONFIG.missionRadiusM) })
@@ -148,7 +155,7 @@ export default function MapScreen() {
 
   return (
     <div className="screen" style={{ overflow: 'hidden' }}>
-      <div ref={box} className="map-wrap" role="application" aria-label={`Map of ${hood?.name ?? 'the neighbourhood'}`} />
+      <div className="map-wrap"><div ref={box} style={{ position: 'absolute', inset: 0 }} role="application" aria-label={`Map of ${hood?.name ?? 'the neighbourhood'}`} /></div>
       <div className="map-top">
         <div className="hud">
           <button className="card" style={{ textAlign: 'left' }} onClick={() => nav('/hood')} aria-label="Change neighbourhood">

@@ -77,7 +77,7 @@ export default function Onboarding() {
               <text x="26" y="80" textAnchor="middle" fontFamily="DM Sans" fontWeight="700" fontSize="14" fill="#161320">{k + 1}</text>
             </g>
           ))}
-          <text x="160" y="235" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="26" fill="#161320">4 seeds. Make them count.</text>
+          <text x="160" y="235" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="22" fill="#161320">4 seeds. Make them count.</text>
         </svg>
       ),
       kicker: 'The rule',
@@ -94,7 +94,7 @@ export default function Onboarding() {
   return (
     <div className="screen onb">
       <div className="row between" style={{ padding: '14px 16px 0' }}>
-        <span className="pill-tag">ECOSCAPE</span>
+        <span className="pill-tag">ECOSCAPE · PROTOTYPE</span>
         <button className="btn ghost" onClick={() => { set({ onboarded: true }); nav('/hood') }}>Skip</button>
       </div>
       <div className="art" key={i} style={{ animation: 'up .3s ease' }}>{sl.art}</div>

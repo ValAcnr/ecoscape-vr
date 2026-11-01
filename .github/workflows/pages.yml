@@ -18,11 +18,22 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      # Until the prototype exists, the site serves the brand directions page.
-      - name: Assemble site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Build prototype
+        working-directory: app
+        run: |
+          npm ci
+          npm run build
+      - name: Assemble site (app at root, brand directions at /brand)
         run: |
           mkdir -p _site
-          cp design/directions/index.html _site/index.html
+          cp -r app/dist/. _site/
+          mkdir -p _site/brand
+          cp design/directions/index.html _site/brand/index.html
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

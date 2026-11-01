@@ -45,7 +45,7 @@ export default function Mission() {
     const partners = city(s.city).demoPartners
     const pl: Planting = {
       id: `pl-${Date.now()}`, missionId: mission.id, hoodId: hood.id, type, plantId: correct.id, plantName: correct.common, latin: correct.latin,
-      name: `${correct.common.split(' ')[0]} ${mission.addr ? 'on ' + mission.addr.replace(/^(Rue|Avenue|Boulevard|Place) (de la |du |des |de l'|de |d')?/, '') : 'corner'}`,
+      name: `${{ flowers: 'Bee Corner', edible: 'Street Garden', tree: 'Shade Tree' }[type]} ${mission.addr ? mission.addr.replace(/^(Rue|Avenue|Boulevard|Place) (de la |du |des |de l'|de |d')?/, '') : hood.name}`,
       lat: mission.lat, lon: mission.lon, addr: mission.addr, partner: partners[s.plantings.length % partners.length], score: total, createdAt: Date.now(),
     }
     set((p) => ({ plantings: [...p.plantings, pl] }))

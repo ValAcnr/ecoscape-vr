@@ -69,8 +69,8 @@ export const CONFIG = {
   /** Brand: 'bloom' for the player app, 'canopy' (quieter) for the sponsor space. */
   brand: { player: 'bloom', sponsor: 'canopy' } as const,
 
-  /** Show the "prototype — demo data" ribbon. */
-  showPrototypeRibbon: true,
+  /** Show the corner "prototype" ribbon (off: it hid controls; the prototype label lives in onboarding, profile and the desktop panel). */
+  showPrototypeRibbon: false,
 }
 
 export const city = (id: CityId = CONFIG.city) => CITIES[id]

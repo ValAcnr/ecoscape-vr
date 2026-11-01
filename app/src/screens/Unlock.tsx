@@ -62,8 +62,8 @@ export default function Unlock() {
               <p className="small muted"><i>{p.latin}</i></p>
             </div>
           </div>
-          <div className="row small" style={{ gap: 6 }}><MapPin size={16} /> {p.addr ?? 'Street spot'}, {home?.name} · GPS {p.lat.toFixed(5)}, {p.lon.toFixed(5)}</div>
-          <div className="row small" style={{ gap: 6 }}><Users size={16} /> Planted by <b>{p.partner}</b> <span className="muted">(demo partner)</span> within 3 weeks</div>
+          <p className="small" style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}><MapPin size={16} style={{ flex: 'none', marginTop: 2 }} /><span>{p.addr ?? 'Street spot'}, {home?.name} · GPS {p.lat.toFixed(5)}, {p.lon.toFixed(5)}</span></p>
+          <p className="small" style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}><Users size={16} style={{ flex: 'none', marginTop: 2 }} /><span>Planted within 3 weeks by <b>{p.partner}</b> <span className="muted">(demo partner)</span></span></p>
         </div>
 
         <div className="card stack" style={{ gap: 12 }}>

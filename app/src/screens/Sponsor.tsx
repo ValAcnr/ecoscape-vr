@@ -46,7 +46,7 @@ export default function Sponsor() {
             <i style={{ width: `${(SPONSOR.mix.tree / mixTotal) * 100}%`, background: 'var(--forest)' }} />
           </div>
           <div className="row small" style={{ gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
-            <span>■ <span style={{ color: '#b07f12' }}>Pollinator flowers {SPONSOR.mix.flowers}</span></span>
+            <span style={{ color: '#b07f12' }}>■ Pollinator flowers {SPONSOR.mix.flowers}</span>
             <span style={{ color: 'var(--moss)' }}>■ Edible {SPONSOR.mix.edible}</span>
             <span style={{ color: 'var(--forest)' }}>■ Trees {SPONSOR.mix.tree}</span>
           </div>
