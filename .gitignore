@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.*
+*.log
+.DS_Store
+# Internal team communication (names of teammates) — kept out of the public repo
+team/
