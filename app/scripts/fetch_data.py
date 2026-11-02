@@ -98,8 +98,8 @@ def missions_from(heat, trees, hood_id, seed, addrs=None):
         bi = min(cand, key=lambda k: (trees[k][0] - cy) ** 2 + (trees[k][1] - cx) ** 2) if cand else None
         best = trees[bi] if bi is not None else [cy, cx]
         addr = addrs[bi] if (addrs and bi is not None) else None
-        # keep missions at least 80 m apart so map markers never overlap
-        if any(math.hypot((best[0] - u[0]) * 111320, (best[1] - u[1]) * 111320 * math.cos(math.radians(best[0]))) < 80 for u in used):
+        # keep missions at least 200 m apart so map markers never overlap
+        if any(math.hypot((best[0] - u[0]) * 111320, (best[1] - u[1]) * 111320 * math.cos(math.radians(best[0]))) < 200 for u in used):
             continue
         used.add((best[0], best[1]))
         t = types[len(out) % len(types)]

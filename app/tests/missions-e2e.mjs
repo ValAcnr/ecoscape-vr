@@ -7,6 +7,7 @@ import { chromium } from 'playwright'
 const BASE = process.argv[2] ?? 'http://localhost:4173/ecoscape-vr/'
 const MODE = process.argv[3] ?? 'mobile'
 const HOODS = (process.argv[4] ?? 'belleville,goutte-dor,butte-aux-cailles,bed-stuy').split(',')
+const [FROM, TO] = (process.argv[5] ?? '1-8').split('-').map(Number) // mission range, 1-based (short batches)
 const CITY = { belleville: 'paris', 'goutte-dor': 'paris', 'butte-aux-cailles': 'paris', 'bed-stuy': 'nyc' }
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
@@ -94,7 +95,7 @@ async function run(hood, idx, strategy) {
 }
 
 for (const hood of HOODS) {
-  for (let i = 0; i < 8; i++) {
+  for (let i = FROM - 1; i < TO; i++) {
     const log = await run(hood, i, 'all-in-order')
     // right-first run: index of the plant that was right in run A
     const rightIdx = log.findIndex((x) => x.startsWith('✓')) // run A tries options 0,1,2 in order, so log index = option index

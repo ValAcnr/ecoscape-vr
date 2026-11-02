@@ -45,6 +45,7 @@ const EDIBLE_RAW: Raw[] = [
   { id: 'mint', common: 'Mint', latin: 'Mentha spicata', exposure: ['partial', 'shade'], soil: ['moist'], native: false, pollinators: 2, note: 'Wants moisture — grows in shade.' },
   { id: 'lettuce', common: 'Lettuce', latin: 'Lactuca sativa', exposure: ['partial'], soil: ['moist', 'fresh'], native: false, pollinators: 0, note: 'Bolts in hot sun; prefers half-shade.' },
   { id: 'sage', common: 'Garden sage', latin: 'Salvia officinalis', exposure: ['sun', 'partial'], soil: ['dry', 'fresh'], native: false, pollinators: 3, note: 'Hardy herb: copes with dry soil and some shade; bees love its flowers.' },
+  { id: 'wild-garlic', common: 'Wild garlic', latin: 'Allium ursinum', exposure: ['shade', 'partial'], soil: ['fresh', 'moist'], native: true, pollinators: 2, note: 'Native woodland herb: edible leaves, happy in shade.' },
   { id: 'rosemary', common: 'Rosemary', latin: 'Salvia rosmarinus', exposure: ['sun'], soil: ['dry'], native: false, pollinators: 3, note: 'Mediterranean, drought-proof, early bee food.' },
 ]
 const EDIBLE: Plant[] = EDIBLE_RAW.map((p) => ({ ...p, type: 'edible' as const, source: 'curated' as const }))
