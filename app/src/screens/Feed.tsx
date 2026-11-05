@@ -17,6 +17,7 @@ export default function Feed() {
   const like = (id: string) => set((st) => ({ likes: st.likes.includes(id) ? st.likes.filter((x) => x !== id) : [...st.likes, id] }))
 
   return (
+    <>
     <div className="screen with-tabs">
       <TopBar title={`${hood} community`} />
       <div className="pad stack" style={{ paddingTop: 0 }}>
@@ -96,7 +97,8 @@ export default function Feed() {
           </>
         )}
       </div>
-      <Tabs />
     </div>
+    <Tabs />
+    </>
   )
 }

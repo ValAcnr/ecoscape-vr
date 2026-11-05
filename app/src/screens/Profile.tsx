@@ -10,6 +10,7 @@ export default function Profile() {
   const nav = useNavigate()
   const left = CONFIG.maxPlantings - s.plantings.length
   return (
+    <>
     <div className="screen with-tabs">
       <TopBar title="My profile" />
       <div className="pad stack" style={{ paddingTop: 4 }}>
@@ -69,7 +70,8 @@ export default function Profile() {
           <p className="small muted">Your data stays on this device. Location is optional and never stored.</p>
         </div>
       </div>
-      <Tabs />
     </div>
+    <Tabs />
+    </>
   )
 }

@@ -27,6 +27,7 @@ export default function Plantings() {
   const months = s.monthsAhead
   const stage = (m: number) => (m >= 12 ? 4 : m >= 3 ? 3 : m >= 1 ? 2 : 1)
   return (
+    <>
     <div className="screen with-tabs">
       <TopBar title="My plantings" right={<span className="chip sun">{s.plantings.length}/{CONFIG.maxPlantings}</span>} />
       <div className="pad stack" style={{ paddingTop: 4 }}>
@@ -82,7 +83,8 @@ export default function Plantings() {
           </>
         )}
       </div>
-      <Tabs />
     </div>
+    <Tabs />
+    </>
   )
 }

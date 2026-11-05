@@ -1,0 +1,36 @@
+name: Refresh open data
+# Re-downloads neighbourhood data (Paris Data / NYC Open Data) and commits the JSON back.
+# Run it from the Actions tab, or push a branch named data-refresh/<anything>.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Comma-separated neighbourhood ids (empty = all)"
+        required: false
+        default: ""
+  push:
+    branches: ['data-refresh/**']
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download data
+        working-directory: app
+        env:
+          ONLY: ${{ github.event.inputs.only || 'bed-stuy,harlem,east-harlem,washington-heights,lower-east-side,mott-haven,bushwick,sunset-park,jackson-heights' }}
+        run: |
+          if [ -n "$ONLY" ]; then python3 scripts/fetch_data.py --only="$ONLY"; else python3 scripts/fetch_data.py; fi
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898733+github-actions[bot]@users.noreply.github.com"
+          git add app/src/data
+          git diff --cached --quiet && echo "No change" && exit 0
+          git commit -m "Refresh open data ($(date -u +%F))"
+          git push

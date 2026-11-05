@@ -3,12 +3,13 @@
 Sources (checked 1 Nov 2026):
 - Ville de Paris open data (ODbL): les-arbres, arbres-plantes-par-projet, permis-de-vegetaliser,
   ilots-de-fraicheur-espaces-verts-frais, fiches-essences-du-guide-des-essences-de-paris
-- NYC Open Data: Forestry Tree Points (hn5i-inap), Heat Vulnerability Index (4mhf-duep)
+- NYC Open Data: Forestry Tree Points (hn5i-inap), Heat Vulnerability Index (4mhf-duep),
+  2015 Street Tree Census (uvpi-gqnh) for street names
 - OpenStreetMap buildings via Overpass API (ODbL) for the VR scene
 
 Heat zones: the prototype uses a transparent PROXY (cells with the lowest street-tree density).
 Production would use the Cerema Local Climate Zones layer.
-Run: python3 scripts/fetch_data.py
+Run: python3 scripts/fetch_data.py  (or --only=harlem,bushwick to refresh some neighbourhoods)
 """
 import json, math, random, urllib.parse, urllib.request
 from pathlib import Path
@@ -22,6 +23,14 @@ HOODS = {
     "goutte-dor":  {"city": "paris", "name": "La Goutte d'Or", "district": "Paris 18e", "bbox": [48.880, 2.345, 48.891, 2.362]},
     "butte-aux-cailles": {"city": "paris", "name": "Butte-aux-Cailles", "district": "Paris 13e", "bbox": [48.822, 2.342, 48.833, 2.360]},
     "bed-stuy":    {"city": "nyc", "name": "Bedford-Stuyvesant", "district": "Brooklyn", "bbox": [40.680, -73.955, 40.694, -73.930], "zips": ["11216", "11221", "11233"]},
+    "harlem":      {"city": "nyc", "name": "Harlem", "district": "Manhattan", "bbox": [40.805, -73.952, 40.819, -73.936], "zips": ["10026", "10027", "10030"]},
+    "east-harlem": {"city": "nyc", "name": "East Harlem", "district": "Manhattan", "bbox": [40.792, -73.950, 40.804, -73.936], "zips": ["10029", "10035"]},
+    "washington-heights": {"city": "nyc", "name": "Washington Heights", "district": "Manhattan", "bbox": [40.838, -73.943, 40.852, -73.930], "zips": ["10032", "10033"]},
+    "lower-east-side": {"city": "nyc", "name": "Lower East Side", "district": "Manhattan", "bbox": [40.712, -73.992, 40.722, -73.978], "zips": ["10002"]},
+    "mott-haven":  {"city": "nyc", "name": "Mott Haven", "district": "The Bronx", "bbox": [40.805, -73.928, 40.816, -73.910], "zips": ["10451", "10454", "10455"]},
+    "bushwick":    {"city": "nyc", "name": "Bushwick", "district": "Brooklyn", "bbox": [40.690, -73.928, 40.703, -73.908], "zips": ["11221", "11237", "11207"]},
+    "sunset-park": {"city": "nyc", "name": "Sunset Park", "district": "Brooklyn", "bbox": [40.638, -74.016, 40.652, -73.998], "zips": ["11220", "11232"]},
+    "jackson-heights": {"city": "nyc", "name": "Jackson Heights", "district": "Queens", "bbox": [40.746, -73.894, 40.758, -73.874], "zips": ["11372"]},
 }
 
 
@@ -145,6 +154,62 @@ def paris_hood(hid, h):
     }
 
 
+def nyc_street(a):
+    """'1188 HALSEY STREET' -> 'Halsey Street'; '108-005 70 AVENUE' -> '70th Avenue'."""
+    import re
+    if not a:
+        return None
+    w = a.upper().split()
+    if len(w) > 1 and re.fullmatch(r"[0-9]+(-[0-9]+)?[A-Z]?", w[0]):
+        w = w[1:]
+    kinds = {"STREET", "AVENUE", "ROAD", "PLACE", "DRIVE", "LANE", "TERRACE"}
+    out = []
+    for i, t in enumerate(w):
+        if t.isdigit() and i + 1 < len(w) and w[i + 1] in kinds:
+            n = int(t)
+            suf = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+            out.append(f"{n}{suf}")
+        elif t in {"OF", "THE", "AND"} and i:
+            out.append(t.lower())
+        else:
+            out.append(t.capitalize())
+    return " ".join(out) or None
+
+
+def nyc_addresses(bbox, trees):
+    """Street name for each tree point = nearest 2015 Street Tree Census record (within ~35 m)."""
+    s, w, n, e = bbox
+    try:
+        q = urllib.parse.urlencode({"$where": f"latitude > {s} AND latitude < {n} AND longitude > {w} AND longitude < {e}",
+                                    "$select": "latitude,longitude,address", "$limit": "30000"})
+        rows = get(f"https://data.cityofnewyork.us/resource/uvpi-gqnh.json?{q}")
+    except Exception as exc:
+        print("census addresses unavailable:", exc)
+        return None
+    grid = {}
+    for r in rows:
+        try:
+            la, lo = float(r["latitude"]), float(r["longitude"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        name = nyc_street(r.get("address"))
+        if name:
+            grid.setdefault((int(la / 0.0004), int(lo / 0.0004)), []).append((la, lo, name))
+    out = []
+    for la, lo in trees:
+        gi, gj = int(la / 0.0004), int(lo / 0.0004)
+        best, bd = None, 35.0
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                for a, b, name in grid.get((gi + di, gj + dj), []):
+                    d = math.hypot((a - la) * 111320, (b - lo) * 111320 * math.cos(math.radians(la)))
+                    if d < bd:
+                        best, bd = name, d
+        out.append(best)
+    print("  census addresses:", len(rows), "rows,", sum(1 for x in out if x), "trees named")
+    return out if any(out) else None
+
+
 def nyc_hood(hid, h):
     s, w, n, e = h["bbox"]
     q = urllib.parse.urlencode({"$where": f"within_box(location, {n}, {w}, {s}, {e}) AND tpstructure='Full'",
@@ -165,8 +230,8 @@ def nyc_hood(hid, h):
         "stats": {"trees": len(trees), "topSpecies": sorted(sp.items(), key=lambda x: -x[1])[:5], "hviByZip": hvi_z},
         "trees": trees, "permits": [], "planted": [], "cool": [],
         "heat": heat,
-        "missions": missions_from(heat, trees, hid, hid),
-        "sources": ["NYC Parks — Forestry Tree Points (NYC Open Data)", "NYC DOHMH — Heat Vulnerability Index (NYC Open Data)",
+        "missions": missions_from(heat, trees, hid, hid, nyc_addresses(h["bbox"], trees)),
+        "sources": ["NYC Parks — Forestry Tree Points (NYC Open Data)", "Street names: 2015 Street Tree Census (NYC Open Data)", "NYC DOHMH — Heat Vulnerability Index (NYC Open Data)",
                     "Heat zones: prototype proxy (lowest street-tree density)"],
     }
 
@@ -215,12 +280,17 @@ def buildings(bbox):
 if __name__ == "__main__":
     import sys
     only_vr = "--vr-only" in sys.argv
+    only = next((a.split("=", 1)[1].split(",") for a in sys.argv if a.startswith("--only=")), None)
     for hid, h in HOODS.items():
         if only_vr:
             break
+        if only and hid not in only:
+            continue
         d = paris_hood(hid, h) if h["city"] == "paris" else nyc_hood(hid, h)
         (OUT / f"hood-{hid}.json").write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")))
         print(hid, d["stats"]["trees"], "trees,", len(d["heat"]), "heat cells,", len(d["missions"]), "missions")
+    if only:
+        sys.exit(0)
     g = guide() if not only_vr else json.loads((OUT / "species-guide.json").read_text())
     (OUT / "species-guide.json").write_text(json.dumps(g, ensure_ascii=False, separators=(",", ":")))
     print("guide", len(g), "species")
