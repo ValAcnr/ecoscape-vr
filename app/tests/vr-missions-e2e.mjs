@@ -13,7 +13,7 @@ for (const order of [[0, 1, 2], [2, 1, 0]]) for (let i = 1; i <= 8; i++) {
   const errs = []; p.on('pageerror', (e) => errs.push(e.message))
   try {
     await p.goto(BASE)
-    await p.evaluate((m) => localStorage.setItem('ecoscape-state-v1', JSON.stringify({ onboarded: true, city: 'paris', hoodId: 'belleville', activeMissionId: m })), id)
+    await p.evaluate((m) => localStorage.setItem('ecoscape-state-v2', JSON.stringify({ onboarded: true, city: 'paris', hoodId: 'belleville', activeMissionId: m })), id)
     // mobile plants for this mission
     await p.goto(`${BASE}?t=${Date.now()}#/mission/${id}`); await p.waitForTimeout(1200) // full load so the seeded state is read
     await p.getByRole('button', { name: /^Start$/ }).click(); await p.waitForTimeout(300)
@@ -37,7 +37,7 @@ for (const order of [[0, 1, 2], [2, 1, 0]]) for (let i = 1; i <= 8; i++) {
     if (!(await p.locator('#vr-game-state').textContent()).startsWith('Step: done')) throw new Error('watering did not complete')
     await p.mouse.click(372, 443); await p.waitForTimeout(2500)
     if (!p.url().includes('#/vr/unlock')) throw new Error('no unlock scene, url ' + p.url())
-    const saved = await p.evaluate((m) => JSON.parse(localStorage.getItem('ecoscape-state-v1')).plantings.some((x) => x.missionId === m), id)
+    const saved = await p.evaluate((m) => JSON.parse(localStorage.getItem('ecoscape-state-v2')).plantings.some((x) => x.missionId === m), id)
     if (!saved) throw new Error('planting not saved')
     if (errs.length) throw new Error('page errors: ' + errs.join(' / '))
     console.log(`PASS vr ${id} order=${order.join('')} plants=[${vr}] :: ${steps.join(' → ')} → unlock`)

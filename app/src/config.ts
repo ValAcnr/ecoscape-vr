@@ -38,21 +38,21 @@ export const CITIES: Record<CityId, CityConfig> = {
   nyc: {
     id: 'nyc',
     label: 'New York',
-    hoods: ['bed-stuy'],
+    hoods: ['bed-stuy', 'harlem', 'east-harlem', 'washington-heights', 'lower-east-side', 'mott-haven', 'bushwick', 'sunset-park', 'jackson-heights'],
     problem: {
       stat: '30%',
       caption: 'canopy goal for New York City by 2040 under Local Law 148 — from 23.4% in 2021.',
       source: 'NYC Urban Forest Plan (2026); NYC Comptroller (2026)',
     },
     framework: 'Plantings support the NYC Urban Forest Plan (Local Law 148) and community gardens.',
-    demoPartners: ['Bed-Stuy Block Gardeners', 'Brooklyn Shade Crew'],
+    demoPartners: ['Bed-Stuy Block Gardeners', 'Brooklyn Shade Crew', 'Uptown Bloom Collective'],
     demoSponsor: 'Demo Sponsor Co.',
   },
 }
 
 export const CONFIG = {
-  /** Launch city — switch to 'nyc' to show the New York version. */
-  city: 'paris' as CityId,
+  /** Launch city — the project targets New York; switch to 'paris' to show the Paris version. */
+  city: 'nyc' as CityId,
 
   /** Planting types offered in missions, and their share. Remove 'tree' for a pollinator/edible-only concept. */
   plantingTypes: ['flowers', 'edible', 'tree'] as PlantingType[],

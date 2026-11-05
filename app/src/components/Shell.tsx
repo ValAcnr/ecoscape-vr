@@ -26,7 +26,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link className="btn" to="/compare">Mobile vs VR side by side</Link>
             <a className="btn ghost" href={`${import.meta.env.BASE_URL}brand/`}>Brand directions</a>
           </div>
-          <p className="small muted" style={{ marginTop: 18 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Trees, permits & cool islands: Ville de Paris open data (ODbL). Partners and sponsors shown are fictional.</p>
+          <p className="small muted" style={{ marginTop: 18 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Street trees, heat vulnerability: NYC Open Data (NYC Parks, DOHMH). Paris: Ville de Paris open data (ODbL). Partners and sponsors shown are fictional.</p>
         </aside>
         <main className="phone">
           {CONFIG.showPrototypeRibbon && <div className="ribbon">PROTOTYPE</div>}

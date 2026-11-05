@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { Heart, MapPin, Share2, Trophy } from 'lucide-react'
 import { HOOD_SUMMARY } from '../data/hoods'
-import { CHALLENGES, LEADERBOARD, POSTS } from '../data/social'
+import { social, type Post } from '../data/social'
 import { useGame, BADGES, type Planting } from '../state'
 import { Tabs, TopBar } from '../components/Shell'
 import { Avatar, PlantArt } from '../components/Art'
 import { makeStory, shareStory } from '../components/story'
-import { CONFIG } from '../config'
+import { CITIES, CONFIG } from '../config'
 
 export default function Feed() {
   const { s, set, addBadge } = useGame()
   const [tab, setTab] = useState<'feed' | 'challenges'>('feed')
-  const hood = s.hoodId ? HOOD_SUMMARY[s.hoodId]?.name : 'Belleville'
+  const { posts: POSTS, challenges: CHALLENGES, leaderboard: LEADERBOARD } = social(s.city)
+  const hood = (s.hoodId && HOOD_SUMMARY[s.hoodId]?.name) || CITIES[s.city].label
   const mine = s.plantings.map((p, i) => ({ id: p.id, who: 'You', color: 'var(--honey)', when: 'Just now', kind: 'planting' as const, text: `Unlocked planting #${i + 1}: “${p.name}” — ${p.partner} plants it within 3 weeks.`, plant: { type: p.type, name: p.plantName, stage: 1 }, likes: 3, street: p.addr ?? undefined, own: p }))
-  const posts: (typeof POSTS[number] & { own?: Planting })[] = [...mine.reverse(), ...POSTS]
+  const posts: (Post & { own?: Planting })[] = [...mine.reverse(), ...POSTS]
   const like = (id: string) => set((st) => ({ likes: st.likes.includes(id) ? st.likes.filter((x) => x !== id) : [...st.likes, id] }))
 
   return (

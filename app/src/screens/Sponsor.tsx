@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download } from 'lucide-react'
 import { city } from '../config'
-import { SPONSOR } from '../data/social'
+import { social } from '../data/social'
 import { useGame } from '../state'
 
 /** Sponsor space — quieter "Canopy" treatment (direction A) for B2B credibility. Demo numbers. */
@@ -9,6 +9,7 @@ export default function Sponsor() {
   const nav = useNavigate()
   const { s } = useGame()
   const c = city(s.city)
+  const SPONSOR = social(s.city).sponsor
   const mixTotal = SPONSOR.mix.flowers + SPONSOR.mix.edible + SPONSOR.mix.tree
   return (
     <div className="screen sponsor">
@@ -57,10 +58,7 @@ export default function Sponsor() {
           <table>
             <thead><tr><th>Spot</th><th>Plant</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td>Rue Vilin</td><td>Wild marjoram</td><td>Photo · month 1</td></tr>
-              <tr><td>Rue Moret</td><td>Thyme planter</td><td>Photo · month 3</td></tr>
-              <tr><td>Rue Julien Lacroix</td><td>Field scabious</td><td>Planted</td></tr>
-              <tr><td>Rue Desargues</td><td>Street tree</td><td>Scheduled</td></tr>
+              {SPONSOR.latest.map(([spot, plant, status]) => <tr key={spot}><td>{spot}</td><td>{plant}</td><td>{status}</td></tr>)}
             </tbody>
           </table>
         </div>

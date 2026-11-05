@@ -36,6 +36,14 @@ export const HOOD_SUMMARY: Record<string, { name: string; district: string; city
   'goutte-dor': { name: "La Goutte d'Or", district: 'Paris 18e', city: 'paris', blurb: 'One of the least green areas of Paris.' },
   'butte-aux-cailles': { name: 'Butte-aux-Cailles', district: 'Paris 13e', city: 'paris', blurb: 'Village streets, street-art, small squares.' },
   'bed-stuy': { name: 'Bedford-Stuyvesant', district: 'Brooklyn, NYC', city: 'nyc', blurb: 'Brownstone blocks in a high heat-vulnerability area.' },
+  harlem: { name: 'Harlem', district: 'Manhattan, NYC', city: 'nyc', blurb: 'Wide avenues and brownstones, with hot, paved blocks.' },
+  'east-harlem': { name: 'East Harlem', district: 'Manhattan, NYC', city: 'nyc', blurb: 'El Barrio — community gardens next to treeless blocks.' },
+  'washington-heights': { name: 'Washington Heights', district: 'Manhattan, NYC', city: 'nyc', blurb: 'Dense, hilly, and one of the hottest parts of Manhattan.' },
+  'lower-east-side': { name: 'Lower East Side', district: 'Manhattan, NYC', city: 'nyc', blurb: 'Tenement streets, very little room for green.' },
+  'mott-haven': { name: 'Mott Haven', district: 'The Bronx, NYC', city: 'nyc', blurb: 'South Bronx — among the highest heat vulnerability in the city.' },
+  bushwick: { name: 'Bushwick', district: 'Brooklyn, NYC', city: 'nyc', blurb: 'Warehouses, murals and few street trees.' },
+  'sunset-park': { name: 'Sunset Park', district: 'Brooklyn, NYC', city: 'nyc', blurb: 'Family blocks around one big park — hot streets around it.' },
+  'jackson-heights': { name: 'Jackson Heights', district: 'Queens, NYC', city: 'nyc', blurb: 'Garden co-ops, busy avenues, many families.' },
 }
 
 const loaders: Record<string, () => Promise<{ default: unknown }>> = {
@@ -43,6 +51,14 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   'goutte-dor': () => import('./hood-goutte-dor.json'),
   'butte-aux-cailles': () => import('./hood-butte-aux-cailles.json'),
   'bed-stuy': () => import('./hood-bed-stuy.json'),
+  harlem: () => import('./hood-harlem.json'),
+  'east-harlem': () => import('./hood-east-harlem.json'),
+  'washington-heights': () => import('./hood-washington-heights.json'),
+  'lower-east-side': () => import('./hood-lower-east-side.json'),
+  'mott-haven': () => import('./hood-mott-haven.json'),
+  bushwick: () => import('./hood-bushwick.json'),
+  'sunset-park': () => import('./hood-sunset-park.json'),
+  'jackson-heights': () => import('./hood-jackson-heights.json'),
 }
 
 const cache: Record<string, Hood> = {}

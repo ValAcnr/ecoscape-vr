@@ -6,9 +6,9 @@ import { chromium } from 'playwright'
 
 const BASE = process.argv[2] ?? 'http://localhost:4173/ecoscape-vr/'
 const MODE = process.argv[3] ?? 'mobile'
-const HOODS = (process.argv[4] ?? 'belleville,goutte-dor,butte-aux-cailles,bed-stuy').split(',')
+const HOODS = (process.argv[4] ?? 'belleville,goutte-dor,butte-aux-cailles,bed-stuy,harlem,east-harlem,washington-heights,lower-east-side,mott-haven,bushwick,sunset-park,jackson-heights').split(',')
 const [FROM, TO] = (process.argv[5] ?? '1-8').split('-').map(Number) // mission range, 1-based (short batches)
-const CITY = { belleville: 'paris', 'goutte-dor': 'paris', 'butte-aux-cailles': 'paris', 'bed-stuy': 'nyc' }
+const CITY = { belleville: 'paris', 'goutte-dor': 'paris', 'butte-aux-cailles': 'paris', 'bed-stuy': 'nyc', 'harlem': 'nyc', 'east-harlem': 'nyc', 'washington-heights': 'nyc', 'lower-east-side': 'nyc', 'mott-haven': 'nyc', 'bushwick': 'nyc', 'sunset-park': 'nyc', 'jackson-heights': 'nyc' }
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
 const ctxOpts = MODE === 'mobile'
@@ -25,7 +25,7 @@ async function run(hood, idx, strategy) {
   const log = []
   try {
     await p.goto(BASE)
-    await p.evaluate(([h, c]) => localStorage.setItem('ecoscape-state-v1', JSON.stringify({ onboarded: true, city: c, hoodId: h })), [hood, CITY[hood]])
+    await p.evaluate(([h, c]) => localStorage.setItem('ecoscape-state-v2', JSON.stringify({ onboarded: true, city: c, hoodId: h })), [hood, CITY[hood]])
     await p.goto(`${BASE}#/map`); await p.reload()
     await p.waitForSelector('button.mk', { timeout: 25000 }); await p.waitForTimeout(1800)
     const marker = p.locator('button.mk').nth(idx)

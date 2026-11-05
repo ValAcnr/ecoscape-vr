@@ -12,5 +12,5 @@ for (let i = 0; i < 3; i++) { await p.mouse.click(378, 443); await p.waitForTime
 await p.waitForTimeout(800); await p.screenshot({ path: `${S}/g2.png` })
 await p.mouse.click(372, 443); await p.waitForTimeout(3500)
 await p.screenshot({ path: `${S}/g3.png` })
-console.log(p.url(), await p.evaluate(() => localStorage.getItem('ecoscape-state-v1')?.slice(0, 160)))
+console.log(p.url(), await p.evaluate(() => localStorage.getItem('ecoscape-state-v2')?.slice(0, 160)))
 await b.close()

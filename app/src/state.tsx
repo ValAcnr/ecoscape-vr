@@ -36,7 +36,7 @@ export interface GameState {
   activeMissionId: string | null
 }
 
-const KEY = 'ecoscape-state-v1'
+const KEY = 'ecoscape-state-v2' // v2: New York is the default city
 const fresh = (): GameState => ({
   onboarded: false,
   city: CONFIG.city,
