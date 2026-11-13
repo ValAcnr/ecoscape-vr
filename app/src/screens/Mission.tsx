@@ -100,7 +100,7 @@ export default function Mission() {
           })}
           <p className="small muted">{type === 'tree' ? 'Tree data: City of Paris tree-species guide (open data).' : 'Simplified for the game. Charter: local, bee-friendly plants only.'}</p>
           {feedback && (
-            <div role="alert" className="card" style={{ background: feedback.ok ? '#c8efda' : '#ffd3dd' }}>
+            <div role="alert" className="card" style={{ background: feedback.ok ? '#d9e2c7' : '#f1dccd' }}>
               <p style={{ fontWeight: 700 }}>{feedback.ok ? '✓ ' : '✗ '}{feedback.text}</p>
             </div>
           )}
@@ -130,7 +130,7 @@ export default function Mission() {
                   <span className="box">{on && <Check size={16} />}</span>
                   <span style={{ fontWeight: 700 }}>{a.label}</span>
                 </button>
-                {careDone && (on || a.good) && <p className="small" style={{ margin: '4px 6px 0', color: a.good ? 'var(--leaf-dark)' : '#c2264f' }}>{a.good ? '✓ ' : '✗ '}{a.why}</p>}
+                {careDone && (on || a.good) && <p className="small" style={{ margin: '4px 6px 0', color: a.good ? 'var(--leaf-dark)' : '#8b3a2b' }}>{a.good ? '✓ ' : '✗ '}{a.why}</p>}
               </div>
             )
           })}
@@ -253,7 +253,7 @@ function Water({ m, plant, onDone }: { m: M; plant: Plant; onDone: (pts: number)
           <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 32 }}>{Math.max(0, WATER_SECONDS - t).toFixed(1)}s</div>
           <div className="tiny muted">In the zone</div>
           <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 24 }}>{pct}%</div>
-          <div className="small" style={{ fontWeight: 700, color: level > hi ? '#2d6fd6' : level < lo ? '#c2264f' : 'var(--leaf-dark)' }}>{level > hi ? 'Too wet' : level < lo ? 'Too dry' : 'Perfect'}</div>
+          <div className="small" style={{ fontWeight: 700, color: level > hi ? '#2d6fd6' : level < lo ? '#8b3a2b' : 'var(--leaf-dark)' }}>{level > hi ? 'Too wet' : level < lo ? 'Too dry' : 'Perfect'}</div>
         </div>
       </div>
       <button className="btn honey block" style={{ minHeight: 64, fontSize: 18 }} onClick={water}><Droplets size={22} /> {running ? 'Water' : 'Tap to start watering'}</button>
@@ -268,7 +268,7 @@ function ScoreRing({ value }: { value: number }) {
     <svg className="score-ring" viewBox="0 0 150 150" role="img" aria-label={`Score ${value} out of 100`} style={{ margin: '0 auto' }}>
       <circle cx="75" cy="75" r={r} fill="none" stroke="#eadfc3" strokeWidth="14" />
       <circle cx="75" cy="75" r={r} fill="none" stroke={value >= PASS ? 'var(--leaf)' : 'var(--petal)'} strokeWidth="14" strokeDasharray={`${(c * value) / 100} ${c}`} strokeLinecap="round" transform="rotate(-90 75 75)" />
-      <text x="75" y="84" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="36" fill="#161320">{value}</text>
+      <text x="75" y="84" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="36" fill="#14281d">{value}</text>
     </svg>
   )
 }

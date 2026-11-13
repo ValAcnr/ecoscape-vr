@@ -65,7 +65,7 @@ export default function Plantings() {
                       const done = months >= st.m
                       return (
                         <li key={st.m} className="row small" style={{ gap: 8, opacity: done ? 1 : 0.5 }}>
-                          <span style={{ width: 22, height: 22, borderRadius: 7, border: '2px solid var(--ink)', display: 'grid', placeItems: 'center', background: done ? 'var(--leaf)' : '#fff', color: '#fff' }}>{done ? <Check size={14} /> : <Clock size={12} color="#161320" />}</span>
+                          <span style={{ width: 22, height: 22, borderRadius: 7, border: '2px solid var(--ink)', display: 'grid', placeItems: 'center', background: done ? 'var(--leaf)' : '#fff', color: '#fff' }}>{done ? <Check size={14} /> : <Clock size={12} color="#14281d" />}</span>
                           {st.label}{st.m === 0 && <span className="muted"> · {p.partner}</span>}
                         </li>
                       )

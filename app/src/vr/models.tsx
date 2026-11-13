@@ -7,7 +7,7 @@ import { C } from './ui3d'
 import vr from '../data/vr-belleville.json'
 
 /** Low-poly plant in the Bloom style (original geometry). */
-const PALETTES = [[C.lilac, C.petal, C.honey], ['#ffffff', '#f4f0ff', '#e8e2ff'], ['#ffe066', '#fff2a8', '#f7c948']]
+const PALETTES = [[C.lilac, C.petal, C.honey], ['#ffffff', '#e3eadf', '#e3eadf'], ['#e6c7b2', '#f2e8d5', '#cda88b']]
 export function Plant3D({ type, scale = 1, position, variant = 0 }: { type: PlantingType; scale?: number; position?: [number, number, number]; variant?: number }) {
   const pal = PALETTES[variant % PALETTES.length]
   const tall = variant === 1 ? 0.75 : variant === 2 ? 0.6 : 1
@@ -19,22 +19,22 @@ export function Plant3D({ type, scale = 1, position, variant = 0 }: { type: Plan
         <group>
           <mesh position={[0, 0.25, 0]}><cylinderGeometry args={[0.025, 0.035, 0.32, 8]} /><meshStandardMaterial color="#7a5533" /></mesh>
           <mesh position={[0, 0.48, 0]}><icosahedronGeometry args={[0.17, 0]} /><meshStandardMaterial color={C.leaf} flatShading /></mesh>
-          <mesh position={[0.1, 0.4, 0.04]}><icosahedronGeometry args={[0.11, 0]} /><meshStandardMaterial color="#38b878" flatShading /></mesh>
+          <mesh position={[0.1, 0.4, 0.04]}><icosahedronGeometry args={[0.11, 0]} /><meshStandardMaterial color="#1b603a" flatShading /></mesh>
         </group>
       ) : type === 'edible' ? (
         <group>
           {[[-0.05, 0.03], [0.05, -0.02], [0, 0.06], [0.03, 0.05]].map(([x, z], i) => (
-            <mesh key={i} position={[x, 0.16 + i * 0.02, z]} rotation={[0.3 * i, i, 0.4]}><sphereGeometry args={[0.06, 8, 6]} /><meshStandardMaterial color="#4cb36b" flatShading /></mesh>
+            <mesh key={i} position={[x, 0.16 + i * 0.02, z]} rotation={[0.3 * i, i, 0.4]}><sphereGeometry args={[0.06, 8, 6]} /><meshStandardMaterial color="#8fa996" flatShading /></mesh>
           ))}
           {[[0.07, 0.04], [-0.05, -0.05], [0.0, 0.09]].map(([x, z], i) => (
-            <mesh key={`t${i}`} position={[x, 0.2, z]}><sphereGeometry args={[0.03, 10, 8]} /><meshStandardMaterial color="#ff5d5d" /></mesh>
+            <mesh key={`t${i}`} position={[x, 0.2, z]}><sphereGeometry args={[0.03, 10, 8]} /><meshStandardMaterial color="#a9603e" /></mesh>
           ))}
         </group>
       ) : (
         <group>
           {[[-0.06, 0, 0.26 * tall, pal[0]], [0.05, 0.03, 0.3 * tall, pal[1]], [0, -0.06, 0.22 * tall, pal[2]], [0.07, -0.05, 0.2 * tall, pal[0]], [-0.07, 0.06, 0.24 * tall, pal[2]]].map(([x, z, h, col], i) => (
             <group key={i} position={[x as number, 0, z as number]}>
-              <mesh position={[0, (h as number) / 2 + 0.08, 0]}><cylinderGeometry args={[0.006, 0.006, h as number, 5]} /><meshStandardMaterial color="#2f8a4f" /></mesh>
+              <mesh position={[0, (h as number) / 2 + 0.08, 0]}><cylinderGeometry args={[0.006, 0.006, h as number, 5]} /><meshStandardMaterial color="#1b603a" /></mesh>
               <mesh position={[0, (h as number) + 0.08, 0]}><sphereGeometry args={[0.035, 10, 8]} /><meshStandardMaterial color={col as string} /></mesh>
             </group>
           ))}
@@ -98,7 +98,7 @@ export function Neighbourhood({ heatOn = true }: { heatOn?: boolean }) {
   }, [trees])
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]}><circleGeometry args={[305, 64]} /><meshStandardMaterial color="#e9e2d0" /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]}><circleGeometry args={[305, 64]} /><meshStandardMaterial color="#e1d6bf" /></mesh>
       {heatOn && heat.map((h, i) => (
         <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[h.x, 0.3, h.z]}><planeGeometry args={[h.w, h.d]} /><meshBasicMaterial color={C.petal} transparent opacity={0.18 + h.level * 0.12} /></mesh>
       ))}

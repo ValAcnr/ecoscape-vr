@@ -166,7 +166,7 @@ function Hood({ go }: { go: (s: Scene) => void }) {
       <Panel w={1.5} h={0.62} position={[0, 1.78, -2.55]} rotation={[0.12, 0, 0]}>
         <Label font="display" size={0.072} position={[0, 0.2, 0]}>Belleville — real buildings, real trees</Label>
         <Chip label="Hot spot" color={C.petal} position={[-0.45, 0.07, 0]} w={0.28} />
-        <Chip label="Street trees" color="#9be2b9" position={[-0.1, 0.07, 0]} w={0.34} />
+        <Chip label="Street trees" color="#a9bfac" position={[-0.1, 0.07, 0]} w={0.34} />
         <Chip label={k < 1 ? 'Mission (edge →)' : 'Mission'} color={C.honey} position={[0.3, 0.07, 0]} w={k < 1 ? 0.38 : 0.26} />
         <Label size={0.04} position={[0, -0.04, 0]} maxWidth={1.35}>Buildings: OpenStreetMap · Trees: Ville de Paris open data · Hot spots: prototype proxy</Label>
         <Button3D label={`Start mission — ${mission.addr}`} w={1.15} h={0.15} position={[0, -0.18, 0]} onClick={() => go('game')} />
@@ -227,11 +227,11 @@ function GameRound({ mission, go }: { mission: Mission; go: (s: Scene) => void }
 
   return (
     <group>
-      <Panel w={1.9} h={0.5} position={[0, 1.9, -2.1]} rotation={[0.1, 0, 0]} color={lastWrong && !found ? '#ffd3dd' : C.paper}>
+      <Panel w={1.9} h={0.5} position={[0, 1.9, -2.1]} rotation={[0.1, 0, 0]} color={lastWrong && !found ? '#f1dccd' : C.paper}>
         <Label font="display" size={0.08} position={[0, 0.14, 0]}>{title}</Label>
-        <Chip label={`${mission.addr ?? 'Street spot'} · ${SITE_LABEL[mission.site]}`} color="#f1ead6" position={[-0.52, 0.01, 0]} w={0.7} />
+        <Chip label={`${mission.addr ?? 'Street spot'} · ${SITE_LABEL[mission.site]}`} color="#e8ddc6" position={[-0.52, 0.01, 0]} w={0.7} />
         <Chip label={EXPOSURE_LABEL[mission.exposure]} color={C.honey} position={[0.07, 0.01, 0]} w={0.3} />
-        <Chip label={SOIL_LABEL[mission.soil]} color="#f1ead6" position={[0.42, 0.01, 0]} w={0.3} />
+        <Chip label={SOIL_LABEL[mission.soil]} color="#e8ddc6" position={[0.42, 0.01, 0]} w={0.3} />
         <Chip label={`Heat ${'●'.repeat(mission.heat)}`} color={C.petal} position={[0.76, 0.01, 0]} w={0.28} />
         <Label size={0.04} position={[0, -0.14, 0]} maxWidth={1.78}>{hint}</Label>
       </Panel>
@@ -243,13 +243,13 @@ function GameRound({ mission, go }: { mission: Mission; go: (s: Scene) => void }
           <group key={p.id} position={[x, 0, -1.45]}
             onClick={(e) => { e.stopPropagation(); pick(p.id) }}
             onPointerOver={() => (document.body.style.cursor = isWrong ? 'not-allowed' : 'pointer')} onPointerOut={() => (document.body.style.cursor = 'default')}>
-            <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.2, 0.22, 0.8, 32]} /><meshStandardMaterial color={isWrong ? '#ffb3c4' : '#fff'} /></mesh>
+            <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.2, 0.22, 0.8, 32]} /><meshStandardMaterial color={isWrong ? '#e6c7b2' : '#fff'} /></mesh>
             <Plant3D type={type} variant={i} scale={1.25} position={[0, 0.8, 0]} />
             {/* generous hit area so the whole pedestal + plant is clickable */}
             <mesh position={[0, 0.75, 0]}><boxGeometry args={[0.5, 1.5, 0.5]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} /></mesh>
             <Label size={0.055} font="bold" position={[0, 1.42, 0]}>{p.common}</Label>
             <Label size={0.035} position={[0, 1.35, 0]}>{`${p.exposure.map((e) => EXPOSURE_LABEL[e]).join(' / ')} · ${p.soil.join(' / ')} soil`}</Label>
-            {isWrong && <Label size={0.05} font="bold" color="#c2264f" position={[0, 1.27, 0]}>✗ Doesn't fit this spot</Label>}
+            {isWrong && <Label size={0.05} font="bold" color="#8b3a2b" position={[0, 1.27, 0]}>✗ Doesn't fit this spot</Label>}
           </group>
         )
       })}
@@ -260,7 +260,7 @@ function GameRound({ mission, go }: { mission: Mission; go: (s: Scene) => void }
           <mesh position={[0, 0.705, 0]}><boxGeometry args={[0.84, 0.02, 0.54]} /><meshStandardMaterial color={water >= 3 ? '#4a3220' : water > 0 ? '#5f4329' : '#9a7a52'} /></mesh>
           <Plant3D type={type} variant={options.findIndex((o) => o.id === correctId)} scale={1.6 + water * 0.12} position={[0, 0.62, 0]} />
           {done && type !== 'tree' && <><Bee radius={0.45} height={1.25} /><Bee radius={0.32} height={1.1} speed={1.3} phase={1.5} /><Bee radius={0.55} height={1.35} speed={0.8} phase={3} /></>}
-          <Panel w={0.62} h={0.36} position={[0.95, 1.15, 0.1]} rotation={[0, -0.4, 0]} color={done ? '#c8efda' : C.paper}>
+          <Panel w={0.62} h={0.36} position={[0.95, 1.15, 0.1]} rotation={[0, -0.4, 0]} color={done ? '#d9e2c7' : C.paper}>
             <Label size={0.035} position={[0, 0.11, 0]}>Street surface (illustrative)</Label>
             <Label font="display" size={0.1} position={[0, 0.0, 0]}>{`${temp} °C`}</Label>
             <Label size={0.035} position={[0, -0.11, 0]}>{done ? 'Shade + moist soil = cooler' : `Soil moisture ${water}/3`}</Label>
@@ -292,7 +292,7 @@ function Unlock({ go }: { go: (s: Scene) => void }) {
         <Label font="display" size={0.13} position={[0, 0.29, 0]} maxWidth={1.6}>{`“${name}”`}</Label>
         <Label size={0.048} position={[0, 0.15, 0]} maxWidth={1.6}>{`${mission.addr}, Belleville · planted within 3 weeks by ${city().demoPartners[0]} (demo partner)`}</Label>
         <Chip label="Earned, not bought" color="#ffffff" position={[-0.55, 0.0, 0]} w={0.5} />
-        <Chip label="On your street" color="#9be2b9" position={[0, 0.0, 0]} w={0.42} />
+        <Chip label="On your street" color="#a9bfac" position={[0, 0.0, 0]} w={0.42} />
         <Chip label="Seen by neighbours" color={C.lilac} position={[0.55, 0.0, 0]} w={0.5} />
         <Button3D label="Back to neighbourhood" w={1.0} h={0.16} position={[-0.38, -0.3, 0]} onClick={() => go('hood')} />
         <Button3D label="Play again" w={0.5} h={0.16} primary={false} position={[0.48, -0.3, 0]} onClick={() => go('game')} />

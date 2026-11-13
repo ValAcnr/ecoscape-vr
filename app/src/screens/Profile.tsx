@@ -47,7 +47,7 @@ export default function Profile() {
         <div className="card stack" style={{ gap: 10 }}>
           <h3>Not another "buy a tree" app</h3>
           <div className="diff"><span className="ico"><GraduationCap size={18} /></span><p className="small"><b>You earn it by learning.</b> No payment: you pass a plant-care mission first.</p></div>
-          <div className="diff"><span className="ico" style={{ background: '#9be2b9' }}><Footprints size={18} /></span><p className="small"><b>It's in your street,</b> not on another continent. You can visit it.</p></div>
+          <div className="diff"><span className="ico" style={{ background: '#a9bfac' }}><Footprints size={18} /></span><p className="small"><b>It's in your street,</b> not on another continent. You can visit it.</p></div>
           <div className="diff"><span className="ico" style={{ background: 'var(--lilac)' }}><Users size={18} /></span><p className="small"><b>A neighbourhood community:</b> feed, challenges, shared care.</p></div>
         </div>
 

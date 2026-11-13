@@ -42,7 +42,7 @@ export default function Sponsor() {
         <div className="s-card">
           <h3 style={{ marginBottom: 8 }}>Planting mix</h3>
           <div style={{ display: 'flex', height: 14, borderRadius: 7, overflow: 'hidden' }}>
-            <i style={{ width: `${(SPONSOR.mix.flowers / mixTotal) * 100}%`, background: '#e0a526' }} />
+            <i style={{ width: `${(SPONSOR.mix.flowers / mixTotal) * 100}%`, background: '#b98a66' }} />
             <i style={{ width: `${(SPONSOR.mix.edible / mixTotal) * 100}%`, background: 'var(--moss)' }} />
             <i style={{ width: `${(SPONSOR.mix.tree / mixTotal) * 100}%`, background: 'var(--forest)' }} />
           </div>

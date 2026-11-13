@@ -8,27 +8,27 @@ export async function makeStory(p: Planting, hoodName: string, index: number, ma
   const g = c.getContext('2d')
   if (!g) return null
   try { await document.fonts.ready } catch { /* ignore */ }
-  g.fillStyle = '#FFC533'
+  g.fillStyle = '#cda88b'
   g.fillRect(0, 0, 1080, 1920)
   // flower motif
   const flower = (x: number, y: number, r: number, petal: string) => {
     g.fillStyle = petal
     for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) { g.beginPath(); g.arc(x + dx * r, y + dy * r, r, 0, 7); g.fill() }
-    g.fillStyle = '#FF6F91'; g.beginPath(); g.arc(x, y, r * 0.8, 0, 7); g.fill()
+    g.fillStyle = '#e6c7b2'; g.beginPath(); g.arc(x, y, r * 0.8, 0, 7); g.fill()
   }
-  flower(860, 260, 70, '#161320')
-  flower(180, 1620, 50, '#B9A4FF')
-  g.fillStyle = '#161320'
+  flower(860, 260, 70, '#14281d')
+  flower(180, 1620, 50, '#a9bfac')
+  g.fillStyle = '#14281d'
   g.font = '800 64px "Bricolage Grotesque", sans-serif'
   g.fillText('EcoScape', 90, 170)
   g.font = '800 120px "Bricolage Grotesque", sans-serif'
   const lines = ['I earned', 'a real planting', `on my street.`]
   lines.forEach((l, i) => g.fillText(l, 90, 520 + i * 135))
   // card
-  g.fillStyle = '#161320'; roundRect(g, 102, 1002, 900, 470, 48); g.fill()
+  g.fillStyle = '#14281d'; roundRect(g, 102, 1002, 900, 470, 48); g.fill()
   g.fillStyle = '#FFFFFF'; roundRect(g, 90, 990, 900, 470, 48); g.fill()
-  g.strokeStyle = '#161320'; g.lineWidth = 8; roundRect(g, 90, 990, 900, 470, 48); g.stroke()
-  g.fillStyle = '#161320'
+  g.strokeStyle = '#14281d'; g.lineWidth = 8; roundRect(g, 90, 990, 900, 470, 48); g.stroke()
+  g.fillStyle = '#14281d'
   g.font = '700 44px "DM Sans", sans-serif'
   g.fillText(`Planting #${index}/${max}`, 140, 1080)
   g.font = '800 76px "Bricolage Grotesque", sans-serif'

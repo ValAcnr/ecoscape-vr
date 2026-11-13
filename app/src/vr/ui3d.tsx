@@ -6,7 +6,7 @@ import bodyFont from '@fontsource/dm-sans/files/dm-sans-latin-500-normal.woff?ur
 import boldFont from '@fontsource/dm-sans/files/dm-sans-latin-700-normal.woff?url'
 
 export const C = {
-  honey: '#ffc533', ink: '#161320', leaf: '#2fa36b', lilac: '#b9a4ff', petal: '#ff6f91', cream: '#fff8e6', paper: '#ffffff', sky: '#cfe6ff',
+  honey: '#cda88b', ink: '#14281d', leaf: '#1b603a', lilac: '#a9bfac', petal: '#e6c7b2', cream: '#f2e8d5', paper: '#ffffff', sky: '#cfe6ff',
 }
 export const FONTS = { display: displayFont, body: bodyFont, bold: boldFont }
 
@@ -38,7 +38,7 @@ export function Label({ children, size = 0.08, color = C.ink, font = 'body', pos
 /** Clickable pill button — works with mouse, touch and XR controller rays (pointer events). */
 export function Button3D({ label, onClick, position, w = 0.9, h = 0.18, primary = true, disabled = false }: { label: string; onClick: () => void; position?: [number, number, number]; w?: number; h?: number; primary?: boolean; disabled?: boolean }) {
   const [hover, setHover] = useState(false)
-  const bg = disabled ? '#d8d0bd' : primary ? (hover ? '#2b2538' : C.ink) : hover ? '#ffe08a' : C.honey
+  const bg = disabled ? '#d8d0bd' : primary ? (hover ? '#2b2538' : C.ink) : hover ? '#eadfc8' : C.honey
   const fg = primary ? C.honey : C.ink
   return (
     <group

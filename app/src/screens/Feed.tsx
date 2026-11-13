@@ -46,7 +46,7 @@ export default function Feed() {
                       {p.street && <div className="row small muted" style={{ gap: 4 }}><MapPin size={12} /> {p.street}</div>}
                     </div>
                     {p.kind === 'badge' && <span className="badge">Badge</span>}
-                    {p.kind === 'growth' && <span className="badge" style={{ background: '#9be2b9' }}>Growing</span>}
+                    {p.kind === 'growth' && <span className="badge" style={{ background: '#a9bfac' }}>Growing</span>}
                   </div>
                   <p>{p.text}</p>
                   {p.plant && (
@@ -56,7 +56,7 @@ export default function Feed() {
                     </div>
                   )}
                   <div className="row" style={{ gap: 8 }}>
-                    <button className="chip" onClick={() => like(p.id)} aria-pressed={liked} style={{ background: liked ? 'var(--petal)' : undefined }}><Heart size={14} fill={liked ? '#161320' : 'none'} /> {p.likes + (liked ? 1 : 0)}</button>
+                    <button className="chip" onClick={() => like(p.id)} aria-pressed={liked} style={{ background: liked ? 'var(--petal)' : undefined }}><Heart size={14} fill={liked ? '#14281d' : 'none'} /> {p.likes + (liked ? 1 : 0)}</button>
                     {p.own && (
                       <button className="chip" onClick={async () => { const own = p.own!; const b = await makeStory(own, hood ?? '', s.plantings.indexOf(own) + 1, CONFIG.maxPlantings); if (b) { await shareStory(b, own.name); set((st) => ({ shares: st.shares + 1 })); addBadge('sharer') } }}><Share2 size={14} /> Story</button>
                     )}

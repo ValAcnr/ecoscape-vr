@@ -17,7 +17,7 @@ export default function Unlock() {
   const [name, setName] = useState(p?.name ?? '')
   const [editing, setEditing] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
-  const confetti = useMemo(() => Array.from({ length: 40 }, (_, i) => ({ left: Math.random() * 100, delay: Math.random() * 0.8, dur: 2 + Math.random() * 1.6, color: ['#FFC533', '#FF6F91', '#B9A4FF', '#2FA36B', '#161320'][i % 5] })), [])
+  const confetti = useMemo(() => Array.from({ length: 40 }, (_, i) => ({ left: Math.random() * 100, delay: Math.random() * 0.8, dur: 2 + Math.random() * 1.6, color: ['#cda88b', '#e6c7b2', '#a9bfac', '#1b603a', '#14281d'][i % 5] })), [])
   useEffect(() => { if (!p) nav('/plantings', { replace: true }) }, [p, nav])
   if (!p) return null
 
@@ -69,7 +69,7 @@ export default function Unlock() {
         <div className="card stack" style={{ gap: 12 }}>
           <h3>Why this is different</h3>
           <div className="diff"><span className="ico"><GraduationCap size={18} /></span><div><b>Earned, not bought.</b><br /><span className="small">You won it with a score of {p.score}/100 — you know how to care for it.</span></div></div>
-          <div className="diff"><span className="ico" style={{ background: '#9be2b9' }}><Footprints size={18} /></span><div><b>It's on your street.</b><br /><span className="small">{walkMin(d)} min walk from you. Go and see it grow.</span></div></div>
+          <div className="diff"><span className="ico" style={{ background: '#a9bfac' }}><Footprints size={18} /></span><div><b>It's on your street.</b><br /><span className="small">{walkMin(d)} min walk from you. Go and see it grow.</span></div></div>
           <div className="diff"><span className="ico" style={{ background: 'var(--lilac)' }}><Users size={18} /></span><div><b>Your neighbours will see it.</b><br /><span className="small">It joins the {home?.name} feed and this week's challenge.</span></div></div>
         </div>
 

@@ -16,7 +16,7 @@ export interface Post {
 const POSTS_PARIS: Post[] = [
   { id: 'p1', who: 'Lina M.', color: 'var(--lilac)', when: '2 h', kind: 'planting', text: "Won my 2nd mission! 'Bee Corner Vilin' is getting planted next week by the Belleville Green Collective 🐝", plant: { type: 'flowers', name: 'Wild marjoram', stage: 1 }, likes: 24, street: 'Rue Vilin' },
   { id: 'p2', who: 'Malik B.', color: 'var(--honey)', when: '5 h', kind: 'growth', text: 'One month later: my thyme planter is flowering and covered in bees. Go see it, corner of Rue Moret!', plant: { type: 'edible', name: 'Thyme', stage: 3 }, likes: 41, street: 'Rue Moret' },
-  { id: 'p3', who: 'Chloé R.', color: '#9be2b9', when: 'Yesterday', kind: 'badge', text: 'Got the Green Thumb badge (94/100). Tip: half-shade + moist soil = mint, not tomatoes 😅', likes: 17 },
+  { id: 'p3', who: 'Chloé R.', color: '#a9bfac', when: 'Yesterday', kind: 'badge', text: 'Got the Green Thumb badge (94/100). Tip: half-shade + moist soil = mint, not tomatoes 😅', likes: 17 },
   { id: 'p4', who: 'Sam K.', color: 'var(--petal)', when: 'Yesterday', kind: 'growth', text: 'Our tree base on Rue Julien Lacroix after 3 months. Watering rota with the neighbours works!', plant: { type: 'flowers', name: 'Field scabious', stage: 4 }, likes: 33, street: 'Rue Julien Lacroix' },
   { id: 'p5', who: 'Inès D.', color: '#bcdcff', when: '2 days', kind: 'planting', text: 'First planting unlocked: a cherry tomato planter for the kids of my building 🍅', plant: { type: 'edible', name: 'Cherry tomato', stage: 1 }, likes: 12, street: 'Rue de Ménilmontant' },
 ]
@@ -58,7 +58,7 @@ const SPONSOR_PARIS = {
 const POSTS_NYC: Post[] = [
   { id: 'n1', who: 'Keisha W.', color: 'var(--lilac)', when: '2 h', kind: 'planting', text: "Won my 2nd mission! 'Bee Corner Halsey' gets planted next week by the Bed-Stuy Block Gardeners 🐝", plant: { type: 'flowers', name: 'Wild marjoram', stage: 1 }, likes: 24, street: 'Halsey Street' },
   { id: 'n2', who: 'Marco T.', color: 'var(--honey)', when: '5 h', kind: 'growth', text: 'One month later: our thyme planter on Knickerbocker is flowering and full of bees. Come see it!', plant: { type: 'edible', name: 'Thyme', stage: 3 }, likes: 41, street: 'Knickerbocker Avenue' },
-  { id: 'n3', who: 'Priya S.', color: '#9be2b9', when: 'Yesterday', kind: 'badge', text: 'Got the Green Thumb badge (94/100). Tip: half-shade + moist soil = mint, not tomatoes 😅', likes: 17 },
+  { id: 'n3', who: 'Priya S.', color: '#a9bfac', when: 'Yesterday', kind: 'badge', text: 'Got the Green Thumb badge (94/100). Tip: half-shade + moist soil = mint, not tomatoes 😅', likes: 17 },
   { id: 'n4', who: 'Darnell J.', color: 'var(--petal)', when: 'Yesterday', kind: 'growth', text: 'Our tree pit on Malcolm X Boulevard after 3 months. The block watering rota works!', plant: { type: 'flowers', name: 'Field scabious', stage: 4 }, likes: 33, street: 'Malcolm X Boulevard' },
   { id: 'n5', who: 'Ana L.', color: '#bcdcff', when: '2 days', kind: 'planting', text: 'First planting unlocked: a cherry tomato planter for the kids in my building in Sunset Park 🍅', plant: { type: 'edible', name: 'Cherry tomato', stage: 1 }, likes: 12, street: '43rd Street' },
   { id: 'n6', who: 'Wei C.', color: 'var(--lilac)', when: '3 days', kind: 'planting', text: 'Lower East Side represent: a shade tree is coming to Orchard Street 🌳', plant: { type: 'tree', name: 'Street tree', stage: 1 }, likes: 28, street: 'Orchard Street' },

@@ -107,8 +107,8 @@ export function useGame() {
 export const BADGES: Record<string, { label: string; desc: string; color: string }> = {
   first: { label: 'First Seed', desc: 'Unlocked your first real planting', color: 'var(--honey)' },
   bee: { label: 'Bee Buddy', desc: 'Planted pollinator flowers', color: 'var(--honey)' },
-  shade: { label: 'Shade Maker', desc: 'Planted a street tree', color: '#9be2b9' },
-  grower: { label: 'Street Grower', desc: 'Planted an edible garden', color: '#9be2b9' },
+  shade: { label: 'Shade Maker', desc: 'Planted a street tree', color: '#a9bfac' },
+  grower: { label: 'Street Grower', desc: 'Planted an edible garden', color: '#a9bfac' },
   perfect: { label: 'Green Thumb', desc: 'Scored 90+ in a mission', color: 'var(--lilac)' },
   water: { label: 'Water Wise', desc: 'Perfect watering rhythm', color: '#bcdcff' },
   sharer: { label: 'Storyteller', desc: 'Shared a planting story', color: 'var(--petal)' },
