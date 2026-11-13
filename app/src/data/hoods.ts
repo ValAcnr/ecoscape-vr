@@ -1,11 +1,12 @@
-import type { CityId, PlantingType } from '../config'
+import type { CityId } from '../config'
 import type { Exposure, Soil } from './plants'
 
 export interface Mission {
   id: string
   lat: number
   lon: number
-  type: PlantingType
+  /** Legacy planting type from the data script ('flowers' | 'edible' | 'tree'): every mission is now played as a street tree. */
+  type: string
   heat: 1 | 2 | 3
   exposure: Exposure
   soil: Soil

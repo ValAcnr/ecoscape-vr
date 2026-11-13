@@ -1,6 +1,6 @@
 import type { Planting } from '../state'
 
-/** Draws a 1080×1920 story image (Instagram/TikTok format) for a planting and shares or downloads it. */
+/** Draws a 1080×1920 story image (Instagram/TikTok format) for an earned street tree and shares or downloads it. */
 export async function makeStory(p: Planting, hoodName: string, index: number, max: number): Promise<Blob | null> {
   const c = document.createElement('canvas')
   c.width = 1080
@@ -10,19 +10,19 @@ export async function makeStory(p: Planting, hoodName: string, index: number, ma
   try { await document.fonts.ready } catch { /* ignore */ }
   g.fillStyle = '#cda88b'
   g.fillRect(0, 0, 1080, 1920)
-  // flower motif
-  const flower = (x: number, y: number, r: number, petal: string) => {
-    g.fillStyle = petal
-    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) { g.beginPath(); g.arc(x + dx * r, y + dy * r, r, 0, 7); g.fill() }
-    g.fillStyle = '#e6c7b2'; g.beginPath(); g.arc(x, y, r * 0.8, 0, 7); g.fill()
+  // tree motif
+  const tree = (x: number, y: number, r: number, crown: string) => {
+    g.fillStyle = '#7a5533'; g.fillRect(x - r * 0.14, y, r * 0.28, r * 1.5)
+    g.fillStyle = crown
+    for (const [dx, dy, k] of [[0, -0.35, 1], [-0.6, 0.1, 0.65], [0.6, 0.1, 0.65]]) { g.beginPath(); g.arc(x + dx * r, y + dy * r, r * k, 0, 7); g.fill() }
   }
-  flower(860, 260, 70, '#14281d')
-  flower(180, 1620, 50, '#a9bfac')
+  tree(860, 260, 110, '#1b603a')
+  tree(190, 1600, 70, '#a9bfac')
   g.fillStyle = '#14281d'
   g.font = '800 64px "Bricolage Grotesque", sans-serif'
   g.fillText('EcoScape', 90, 170)
   g.font = '800 120px "Bricolage Grotesque", sans-serif'
-  const lines = ['I earned', 'a real planting', `on my street.`]
+  const lines = ['I earned', 'a real tree', `on my block.`]
   lines.forEach((l, i) => g.fillText(l, 90, 520 + i * 135))
   // card
   g.fillStyle = '#14281d'; roundRect(g, 102, 1002, 900, 470, 48); g.fill()
@@ -30,14 +30,14 @@ export async function makeStory(p: Planting, hoodName: string, index: number, ma
   g.strokeStyle = '#14281d'; g.lineWidth = 8; roundRect(g, 90, 990, 900, 470, 48); g.stroke()
   g.fillStyle = '#14281d'
   g.font = '700 44px "DM Sans", sans-serif'
-  g.fillText(`Planting #${index}/${max}`, 140, 1080)
+  g.fillText(`Street tree #${index}/${max} · New York`, 140, 1080)
   g.font = '800 76px "Bricolage Grotesque", sans-serif'
   wrap(g, `“${p.name}”`, 140, 1180, 800, 84)
   g.font = '500 42px "DM Sans", sans-serif'
   g.fillText(`${p.plantName} · ${p.addr ?? hoodName}`, 140, 1340)
-  g.fillText(`Planted by ${p.partner}`, 140, 1400)
+  g.fillText(`Planted & cared for by ${p.partner}`, 140, 1400)
   g.font = '700 46px "DM Sans", sans-serif'
-  g.fillText('Not bought. Earned. 🌱', 90, 1700)
+  g.fillText('Not bought. Earned. 🌳', 90, 1700)
   g.font = '500 36px "DM Sans", sans-serif'
   g.fillText((location.host + import.meta.env.BASE_URL).replace(/\/$/, ''), 90, 1770)
   return new Promise((res) => c.toBlob((b) => res(b), 'image/png'))
@@ -59,7 +59,7 @@ export async function shareStory(blob: Blob, name: string) {
   const file = new File([blob], `ecoscape-${name.replace(/\W+/g, '-').toLowerCase()}.png`, { type: 'image/png' })
   try {
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'My EcoScape planting', text: 'I earned a real planting on my street 🌱' })
+      await navigator.share({ files: [file], title: `My EcoScape tree: ${name}`, text: `I earned a real street tree on my block: “${name}” 🌳` })
       return 'shared'
     }
   } catch { /* user cancelled: fall back to download */ }

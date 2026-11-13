@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, Droplets, RotateCcw, X } from 'lucide-react'
+import { ArrowLeft, Check, Droplets, RotateCcw, TreeDeciduous, X } from 'lucide-react'
 import { CONFIG, city } from '../config'
 import { loadHood, type Hood, type Mission as M } from '../data/hoods'
-import { EXPOSURE_LABEL, SITE_LABEL, SOIL_LABEL, TYPE_LABEL, type Plant } from '../data/plants'
-import { PASS, candidates, careActions, explain, missionType, waterBand } from '../game/rules'
+import { EXPOSURE_LABEL, PIT_LABEL, SIZE_LABEL, SOIL_LABEL, TYPE_LABEL, type Plant } from '../data/plants'
+import { CARE_PICKS, PASS, WATER_MAX_GAL, candidates, careActions, explain, missionType, pitOf, waterBand } from '../game/rules'
+import { NAME_MAX, checkName, cleanName, suggestName } from '../game/names'
 import { useGame, type Planting } from '../state'
 import { PlantArt } from '../components/Art'
 
@@ -17,7 +18,7 @@ export default function Mission() {
   const [hood, setHood] = useState<Hood | null>(null)
   const [step, setStep] = useState(0)
   // scores
-  // Step 1: tap a plant to select it, then "Plant it here" checks the choice.
+  // Step 1: tap a species to select it, then "Plant it here" checks the choice.
   const [selected, setSelected] = useState<string | null>(null)
   const [wrong, setWrong] = useState<string[]>([])
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
@@ -25,6 +26,9 @@ export default function Mission() {
   const [waterScore, setWaterScore] = useState<number | null>(null)
   const [care, setCare] = useState<string[]>([])
   const [careDone, setCareDone] = useState(false)
+  // Step 5 (after a win): name the tree
+  const [treeName, setTreeName] = useState('')
+  const [nameErr, setNameErr] = useState<string | null>(null)
 
   useEffect(() => { if (s.hoodId) loadHood(s.hoodId).then(setHood) }, [s.hoodId])
   useEffect(() => { if (id && s.activeMissionId !== id) set({ activeMissionId: id }) }, [id, s.activeMissionId, set])
@@ -34,29 +38,40 @@ export default function Mission() {
   const type = missionType(mission)
   const correct = game.options.find((p) => p.id === game.correctId)!
 
+  // Maintenance mode (4/4 trees earned): the tree is already in the ground — water it and protect its pit.
+  const adopt = s.plantings.length >= CONFIG.maxPlantings
   // 40 pts first try, 30 second, 20 third: a wrong pick costs points but never makes the mission impossible
   const choosePts = found ? 40 - 10 * wrong.length : 0
   const acts = careActions(type)
-  const carePts = careDone ? Math.max(0, acts.reduce((n, a) => n + (care.includes(a.id) ? (a.good ? 12.5 : -12.5) : 0), 0)) : 0
-  const total = Math.round(choosePts + (waterScore ?? 0) + carePts)
-  const adopt = s.plantings.length >= CONFIG.maxPlantings
+  const per = 25 / CARE_PICKS
+  const carePts = careDone ? Math.max(0, acts.reduce((n, a) => n + (care.includes(a.id) ? (a.good ? per : -per) : 0), 0)) : 0
+  const total = adopt ? Math.round(((waterScore ?? 0) + carePts) * (100 / 60)) : Math.round(choosePts + (waterScore ?? 0) + carePts)
+  const passed = total >= PASS
 
   const finish = () => {
-    const passed = total >= PASS
-    set((p) => ({ missionsPlayed: p.missionsPlayed + 1, missionsPassed: p.missionsPassed + (passed ? 1 : 0), bestScore: Math.max(p.bestScore, total) }))
+    set((p) => ({ missionsPlayed: p.missionsPlayed + 1, missionsPassed: p.missionsPassed + (passed ? 1 : 0), bestScore: Math.max(p.bestScore, total), careMissions: p.careMissions + (adopt && passed ? 1 : 0) }))
     if (total >= 90) addBadge('perfect')
     if ((waterScore ?? 0) >= 32) addBadge('water')
-    if (!passed) return setStep(4)
-    if (adopt) return setStep(4)
+    if (adopt && passed) { addBadge('keeper'); if (s.careMissions + 1 >= 5) addBadge('guardian') }
+    if (!passed || adopt) return setStep(4)
+    setTreeName(suggestName(mission.addr, hood.name))
+    setStep(5)
+  }
+
+  // After a win: the player names the tree, then it is created and handed to the partner NGO.
+  const saveTree = () => {
+    const err = checkName(treeName)
+    if (err) return setNameErr(err)
+    if (s.plantings.length >= CONFIG.maxPlantings) return nav('/plantings', { replace: true })
     const partners = city(s.city).demoPartners
     const pl: Planting = {
       id: `pl-${Date.now()}`, missionId: mission.id, hoodId: hood.id, type, plantId: correct.id, plantName: correct.common, latin: correct.latin,
-      name: `${{ flowers: 'Bee Corner', edible: 'Street Garden', tree: 'Shade Tree' }[type]} ${mission.addr ? mission.addr.replace(/^(Rue|Avenue|Boulevard|Place) (de la |du |des |de l'|de |d')?/, '').replace(/ (Street|Avenue|Road|Place|Boulevard|Drive)$/, '') : hood.name}`,
+      name: cleanName(treeName),
       lat: mission.lat, lon: mission.lon, addr: mission.addr, partner: partners[s.plantings.length % partners.length], score: total, createdAt: Date.now(),
     }
     set((p) => ({ plantings: [...p.plantings, pl] }))
     addBadge('first')
-    addBadge(type === 'flowers' ? 'bee' : type === 'tree' ? 'shade' : 'grower')
+    if (correct.size === 'large') addBadge('shade')
     if (s.plantings.length + 1 >= CONFIG.maxPlantings) addBadge('full')
     nav(`/unlock/${pl.id}`, { replace: true })
   }
@@ -66,17 +81,17 @@ export default function Mission() {
       <header className="topbar">
         <button className="iconbtn" onClick={() => nav('/map')} aria-label="Back to map"><ArrowLeft size={18} /></button>
         <div className="progress" style={{ flex: 1, margin: '0 10px' }} aria-label={`Step ${Math.min(step, 3)} of 3`}>
-          {[1, 2, 3].map((k) => <span key={k} className={step >= k ? 'on' : ''} />)}
+          {(adopt ? [2, 3] : [1, 2, 3]).map((k) => <span key={k} className={step >= k ? 'on' : ''} />)}
         </div>
         <span className="chip sun" aria-label="Score">{total} pts</span>
       </header>
 
-      {step === 0 && <Brief m={mission} onGo={() => setStep(1)} adopt={adopt} />}
+      {step === 0 && <Brief m={mission} onGo={() => setStep(adopt ? 2 : 1)} adopt={adopt} />}
 
       {step === 1 && (
         <div className="pad stack">
-          <span className="tiny muted">Step 1 · Choose the right plant</span>
-          <h2>Which one will thrive here?</h2>
+          <span className="tiny muted">Step 1 · Choose the right tree</span>
+          <h2>Which species will thrive in this pit?</h2>
           <Conditions m={mission} />
           {game.options.map((p) => {
             const isWrong = wrong.includes(p.id)
@@ -85,48 +100,49 @@ export default function Mission() {
               <button key={p.id} type="button" className={`option ${isWrong ? 'wrong' : ''}`} aria-pressed={isSel} disabled={isWrong}
                 style={isSel ? { background: 'var(--honey)', boxShadow: 'var(--shadow)' } : undefined}
                 onClick={() => { setSelected(p.id); setFeedback(null) }}>
-                <PlantArt type={type} stage={3} w={64} label={p.common} />
+                <PlantArt type={type} stage={3} w={64} label={p.common} variant={game.options.indexOf(p)} />
                 <div>
                   <div className="row between"><h3>{p.common}</h3>{isWrong ? <X size={20} aria-label="Does not fit" /> : isSel ? <span className="pill-tag">SELECTED</span> : null}</div>
                   <div className="small muted"><i>{p.latin}</i></div>
                   <div className="row wrap" style={{ gap: 4, marginTop: 6 }}>
                     {p.exposure.map((e) => <span key={e} className={`chip ${e}`} style={{ fontSize: 11, padding: '2px 7px' }}>{EXPOSURE_LABEL[e]}</span>)}
                     {p.soil.map((e) => <span key={e} className="chip" style={{ fontSize: 11, padding: '2px 7px' }}>{SOIL_LABEL[e]}</span>)}
+                    <span className="chip leaf" style={{ fontSize: 11, padding: '2px 7px' }}>{SIZE_LABEL[p.size]}</span>
                   </div>
                   {isWrong && <p className="small" style={{ marginTop: 6 }}>{explain(p, mission)}</p>}
                 </div>
               </button>
             )
           })}
-          <p className="small muted">{type === 'tree' ? 'Tree data: City of Paris tree-species guide (open data).' : 'Simplified for the game. Charter: local, bee-friendly plants only.'}</p>
+          <p className="small muted">Common NYC street trees (NYC Parks species list, 2015 Street Tree Census) — site needs simplified for the game.</p>
           {feedback && (
             <div role="alert" className="card" style={{ background: feedback.ok ? '#d9e2c7' : '#f1dccd' }}>
               <p style={{ fontWeight: 700 }}>{feedback.ok ? '✓ ' : '✗ '}{feedback.text}</p>
             </div>
           )}
           <button type="button" className="btn primary block" onClick={() => {
-            if (!selected) return setFeedback({ ok: false, text: 'Tap one of the plants above to select it first.' })
+            if (!selected) return setFeedback({ ok: false, text: 'Tap one of the trees above to select it first.' })
             const p = game.options.find((o) => o.id === selected)!
             if (p.id === game.correctId) { setFound(true); setFeedback(null); setStep(2); return }
             const left = game.options.length - wrong.length - 2
             setWrong((w) => [...w, p.id])
             setSelected(null)
-            setFeedback({ ok: false, text: `Not this one: ${explain(p, mission)} ${left > 0 ? `Try another plant (${left + 1} left).` : 'Only one plant left — it is the one that fits this spot.'}` })
+            setFeedback({ ok: false, text: `Not this one: ${explain(p, mission)} ${left > 0 ? `Try another tree (${left + 1} left).` : 'Only one tree left — it is the one that fits this pit.'}` })
           }}>{selected ? `Plant ${game.options.find((o) => o.id === selected)?.common} here` : 'Plant it here'}</button>
         </div>
       )}
 
-      {step === 2 && <Water m={mission} plant={correct} onDone={(pts) => { setWaterScore(pts); setStep(3) }} />}
+      {step === 2 && <Water m={mission} plant={correct} adopt={adopt} onDone={(pts) => { setWaterScore(pts); setStep(3) }} />}
 
       {step === 3 && (
         <div className="pad stack">
-          <span className="tiny muted">Step 3 · Look after the soil</span>
-          <h2>Pick the 2 right care actions</h2>
+          <span className="tiny muted">Step 3 · Protect the tree pit</span>
+          <h2>Pick the {CARE_PICKS} right care actions</h2>
           {acts.map((a) => {
             const on = care.includes(a.id)
             return (
               <div key={a.id}>
-                <button className={`check ${on ? 'on' : ''}`} disabled={careDone} aria-pressed={on} onClick={() => setCare((c) => (on ? c.filter((x) => x !== a.id) : c.length < 2 ? [...c, a.id] : c))}>
+                <button className={`check ${on ? 'on' : ''}`} disabled={careDone} aria-pressed={on} onClick={() => setCare((c) => (on ? c.filter((x) => x !== a.id) : c.length < CARE_PICKS ? [...c, a.id] : c))}>
                   <span className="box">{on && <Check size={16} />}</span>
                   <span style={{ fontWeight: 700 }}>{a.label}</span>
                 </button>
@@ -135,7 +151,7 @@ export default function Mission() {
             )
           })}
           {!careDone ? (
-            <button className="btn primary block" disabled={care.length < 2} onClick={() => setCareDone(true)}>Check</button>
+            <button className="btn primary block" disabled={care.length < CARE_PICKS} onClick={() => setCareDone(true)}>Check ({care.length}/{CARE_PICKS})</button>
           ) : (
             <button className="btn honey block" onClick={finish}>See my result</button>
           )}
@@ -145,34 +161,53 @@ export default function Mission() {
       {step === 4 && (
         <div className="pad stack center" style={{ paddingTop: 30 }}>
           <ScoreRing value={total} />
-          {total >= PASS ? (
+          {passed ? (
             <>
-              <h2>Adopt mode: great care!</h2>
-              <p>You've already unlocked your {CONFIG.maxPlantings} plantings. This win adds care points and helps your neighbourhood challenge.</p>
+              <h2>Maintenance mission won!</h2>
+              <p>You've earned your {CONFIG.maxPlantings}/{CONFIG.maxPlantings} trees, so this win doesn't add a new tree: it keeps a young neighbourhood tree alive. +1 maintenance mission, and badges like <b>Tree Keeper</b>.</p>
             </>
           ) : (
             <>
               <h2>Almost! {PASS} needed.</h2>
               <div className="card" style={{ textAlign: 'left' }}>
-                {[['Right plant', choosePts, 40], ['Watering', waterScore ?? 0, 35], ['Soil care', Math.round(carePts), 25]].map(([k, v, max]) => (
+                {(adopt ? [['Watering', waterScore ?? 0, 35], ['Pit care', Math.round(carePts), 25]] : [['Right tree', choosePts, 40], ['Watering', waterScore ?? 0, 35], ['Pit care', Math.round(carePts), 25]]).map(([k, v, max]) => (
                   <div key={k as string} className="row between small" style={{ padding: '3px 0' }}><span>{k}</span><b>{v}/{max}</b></div>
                 ))}
               </div>
               <p>{(waterScore ?? 0) < 25
-                ? 'Your plant is in the right spot — the watering was off. Keep the blue level inside the green zone: tap a little and often.'
-                : carePts < 25 ? 'Look again at the care actions: no pesticides, no plastic.' : 'So close — try once more.'}</p>
+                ? `${adopt ? 'The tree' : 'Your tree'} is in the right pit — the watering was off. Keep it between ${CONFIG.water.minGal} and ${CONFIG.water.maxGal} gallons a week: a little and often.`
+                : carePts < 25 ? 'Look again at the pit care: mulch (not against the trunk), weeding, and no compacted soil.' : 'So close — try once more.'}</p>
             </>
           )}
           <div className="stack" style={{ gap: 8 }}>
-            {total < PASS && found && (
-              <button className="btn honey block" onClick={() => { setWaterScore(null); setCare([]); setCareDone(false); setStep(2) }}><RotateCcw size={16} /> Retry watering (keep {correct.common})</button>
+            {!passed && (found || adopt) && (
+              <button className="btn honey block" onClick={() => { setWaterScore(null); setCare([]); setCareDone(false); setStep(2) }}><RotateCcw size={16} /> Retry watering{adopt ? '' : ` (keep ${correct.common})`}</button>
             )}
             <div className="row" style={{ justifyContent: 'center' }}>
-              <button className="btn" onClick={() => { setStep(1); setSelected(null); setWrong([]); setFound(false); setFeedback(null); setWaterScore(null); setCare([]); setCareDone(false) }}><RotateCcw size={16} /> Restart mission</button>
+              <button className="btn" onClick={() => { setStep(adopt ? 2 : 1); setSelected(null); setWrong([]); setFound(false); setFeedback(null); setWaterScore(null); setCare([]); setCareDone(false) }}><RotateCcw size={16} /> Restart mission</button>
               <button className="btn primary" onClick={() => nav('/map')}>Back to map</button>
             </div>
           </div>
         </div>
+      )}
+
+      {step === 5 && (
+        <form className="pad stack" style={{ paddingTop: 20 }} onSubmit={(e) => { e.preventDefault(); saveTree() }}>
+          <div style={{ display: 'grid', placeItems: 'center' }}><ScoreRing value={total} /></div>
+          <span className="pill-tag" style={{ justifySelf: 'start' }}>MISSION WON · {s.plantings.length + 1}/{CONFIG.maxPlantings} TREES</span>
+          <h2>You earned a real {correct.common}. Name your tree!</h2>
+          <p className="small">The name goes on your tree's page, in the {hood.name} feed and on your story image. Your neighbours will see it.</p>
+          <label className="stack" style={{ gap: 6 }}>
+            <span className="tiny muted">Tree name</span>
+            <input className="field" aria-label="Tree name" aria-invalid={!!nameErr} aria-describedby="name-help" value={treeName} maxLength={NAME_MAX + 6} autoFocus
+              onChange={(e) => { setTreeName(e.target.value); setNameErr(null) }} placeholder="e.g. Little Lafayette" />
+          </label>
+          <div id="name-help" className="row between small" role={nameErr ? 'alert' : undefined}>
+            <span style={{ color: nameErr ? '#8b3a2b' : undefined, fontWeight: nameErr ? 700 : undefined }}>{nameErr ?? 'Friendly names only.'}</span>
+            <span className="muted">{cleanName(treeName).length}/{NAME_MAX}</span>
+          </div>
+          <button type="submit" className="btn primary block"><TreeDeciduous size={18} /> Name my tree</button>
+        </form>
       )}
     </div>
   )
@@ -181,9 +216,10 @@ export default function Mission() {
 function Conditions({ m }: { m: M }) {
   return (
     <div className="card row wrap" style={{ gap: 6 }}>
-      <span className="small" style={{ fontWeight: 700, width: '100%' }}>{m.addr ?? 'Street spot'} · {SITE_LABEL[m.site]}</span>
+      <span className="small" style={{ fontWeight: 700, width: '100%' }}>{m.addr ?? 'Street spot'} · Street tree pit</span>
       <span className={`chip ${m.exposure}`}>{EXPOSURE_LABEL[m.exposure]}</span>
       <span className="chip">{SOIL_LABEL[m.soil]}</span>
+      <span className="chip leaf">{PIT_LABEL[pitOf(m)]}</span>
       <span className="chip hot">Heat {'●'.repeat(m.heat)}</span>
     </div>
   )
@@ -194,16 +230,20 @@ function Brief({ m, onGo, adopt }: { m: M; onGo: () => void; adopt: boolean }) {
   return (
     <div className="pad stack">
       <div className="center" style={{ display: 'grid', placeItems: 'center' }}><PlantArt type={type} stage={0} w={150} /></div>
-      <span className="tiny muted">Mission · {TYPE_LABEL[type]}</span>
-      <h1>This corner needs you.</h1>
+      <span className="tiny muted">{adopt ? 'Maintenance mission' : 'Mission'} · {TYPE_LABEL[type]}</span>
+      <h1>{adopt ? 'This young tree needs you.' : 'This block needs a tree.'}</h1>
       <Conditions m={m} />
-      <p>Three quick steps: <b>choose</b> the right plant, <b>water</b> at the right rhythm, <b>care</b> for the soil. Score {PASS}+ to {adopt ? 'earn care points (adopt mode)' : 'unlock a real planting right here'}.</p>
+      {adopt ? (
+        <p>You've earned your {CONFIG.maxPlantings}/{CONFIG.maxPlantings} trees: you're in <b>maintenance mode</b>. A neighbourhood tree is already in this pit — <b>water</b> it ({CONFIG.water.minGal}–{CONFIG.water.maxGal} gallons a week) and <b>protect</b> its pit. Score {PASS}+ to win care badges.</p>
+      ) : (
+        <p>Three quick steps: <b>choose</b> the right species for the pit, <b>water</b> it {CONFIG.water.minGal}–{CONFIG.water.maxGal} gallons a week from May to October, <b>protect</b> the pit. Score {PASS}+ to earn a real street tree right here.</p>
+      )}
       <button className="btn primary block" onClick={onGo}>Start</button>
     </div>
   )
 }
 
-function Water({ m, plant, onDone }: { m: M; plant: Plant; onDone: (pts: number) => void }) {
+function Water({ m, plant, adopt, onDone }: { m: M; plant: Plant; adopt: boolean; onDone: (pts: number) => void }) {
   const [lo, hi] = waterBand(m)
   const [level, setLevel] = useState((lo + hi) / 2 - 15)
   const [t, setT] = useState(0)
@@ -235,28 +275,34 @@ function Water({ m, plant, onDone }: { m: M; plant: Plant; onDone: (pts: number)
 
   const water = () => {
     if (!running) setRunning(true)
-    setLevel((x) => Math.min(100, x + 10))
+    setLevel((x) => Math.min(100, x + 8.5)) // one bucket ≈ 2.5 gallons
   }
   const pct = ticks.current ? Math.round((inBand.current / ticks.current) * 100) : 0
+  const gal = (level / 100) * WATER_MAX_GAL
+  const months = CONFIG.water.months
+  const month = months[Math.min(months.length - 1, Math.floor((t / WATER_SECONDS) * months.length))]
   return (
     <div className="pad stack">
       <span className="tiny muted">Step 2 · Water at the right rhythm</span>
-      <h2>Keep the soil in the green zone</h2>
-      <p className="small muted">{plant.common} in {SOIL_LABEL[m.soil].toLowerCase()} — hot spots dry out faster. Don't drown it!</p>
+      <h2>{CONFIG.water.minGal}–{CONFIG.water.maxGal} gallons a week, May to October</h2>
+      <p className="small muted">{adopt ? 'This young tree' : plant.common} in {SOIL_LABEL[m.soil].toLowerCase()} — hot blocks dry out faster. Keep the weekly water in the green zone. Don't drown it!</p>
       <div className="row" style={{ justifyContent: 'center', gap: 24, alignItems: 'flex-end', margin: '8px 0' }}>
-        <div className="gauge" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level)} aria-label="Soil moisture">
+        <div className="gauge" role="meter" aria-valuemin={0} aria-valuemax={WATER_MAX_GAL} aria-valuenow={Math.round(gal)} aria-label="Water this week, in gallons">
           <div className="water" style={{ height: `${level}%` }} />
           <div className="band" style={{ bottom: `${lo}%`, height: `${hi - lo}%` }} />
         </div>
         <div className="stack" style={{ gap: 4, minWidth: 110 }}>
-          <div className="tiny muted">Time</div>
-          <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 32 }}>{Math.max(0, WATER_SECONDS - t).toFixed(1)}s</div>
+          <div className="tiny muted">Season</div>
+          <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 26 }}>{month}</div>
+          <div className="tiny muted">This week</div>
+          <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 24 }}>{gal.toFixed(0)} gal</div>
           <div className="tiny muted">In the zone</div>
           <div style={{ fontFamily: 'var(--f-display)', fontWeight: 800, fontSize: 24 }}>{pct}%</div>
-          <div className="small" style={{ fontWeight: 700, color: level > hi ? '#2d6fd6' : level < lo ? '#8b3a2b' : 'var(--leaf-dark)' }}>{level > hi ? 'Too wet' : level < lo ? 'Too dry' : 'Perfect'}</div>
+          <div className="small" style={{ fontWeight: 700, color: level > hi ? '#2d6fd6' : level < lo ? '#8b3a2b' : 'var(--leaf-dark)' }}>{level > hi ? 'Too much' : level < lo ? 'Too dry' : 'Perfect'}</div>
         </div>
       </div>
-      <button className="btn honey block" style={{ minHeight: 64, fontSize: 18 }} onClick={water}><Droplets size={22} /> {running ? 'Water' : 'Tap to start watering'}</button>
+      <button className="btn honey block" style={{ minHeight: 64, fontSize: 18 }} onClick={water}><Droplets size={22} /> {running ? 'Water (+2.5 gal)' : 'Tap to start watering'}</button>
+      <p className="small muted center">{Math.max(0, WATER_SECONDS - t).toFixed(1)} s left · green zone = {CONFIG.water.minGal}–{CONFIG.water.maxGal} gal</p>
     </div>
   )
 }

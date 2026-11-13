@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CONFIG, city } from '../config'
 import { loadHood } from '../data/hoods'
+import { candidates } from '../game/rules'
 import { useGame } from '../state'
 import { Logo } from '../components/Art'
 
 const BASE = import.meta.env.BASE_URL
 const STEPS = [
-  { id: 'discover', label: '1 · Discover', mobile: '#/welcome', vr: '#/vr/hub', what: 'Onboarding: the heat & biodiversity problem, Earn-to-Plant, the 4-planting rule.' },
-  { id: 'explore', label: '2 · Explore', mobile: '#/map', vr: '#/vr/hood', what: 'Real neighbourhood: hot spots, street trees, missions on real streets.' },
-  { id: 'learn', label: '3 · Learn & play', mobile: '#/mission/belleville-m1', vr: '#/vr/game', what: 'Mini-game: choose the right plant for sun & soil, water it, care for it.' },
-  { id: 'unlock', label: '4 · Unlock & follow', mobile: '#/plantings', vr: '#/vr/unlock', what: 'A real planting, named and geolocated, planted by a local partner.' },
+  { id: 'discover', label: '1 · Discover', mobile: '#/welcome', vr: '#/vr/hub', what: 'Onboarding: hot blocks short of trees, Earn-to-Plant, the 4-tree rule.' },
+  { id: 'explore', label: '2 · Explore', mobile: '#/map', vr: '#/vr/hood', what: 'Real New York neighbourhood (Bed-Stuy): hot spots, street trees, missions on real tree pits.' },
+  { id: 'learn', label: '3 · Learn & play', mobile: '#/mission/bed-stuy-m1', vr: '#/vr/game', what: 'Mini-game: choose the right species for sun, soil & pit size, water it 15–20 gal/week, protect the pit.' },
+  { id: 'unlock', label: '4 · Unlock & follow', mobile: '#/plantings', vr: '#/vr/unlock', what: 'A real street tree, named by the player, planted and cared for 3 years by a partner NGO.' },
 ]
 
 export default function Compare() {
@@ -20,12 +21,14 @@ export default function Compare() {
 
   // Make sure the embedded mobile app has a neighbourhood and is standing next to the demo mission.
   useEffect(() => {
-    if (s.onboarded && s.hoodId === 'belleville' && s.player && s.activeMissionId === 'belleville-m1') { setReady(true); return }
-    loadHood('belleville').then((h) => {
+    if (s.onboarded && s.hoodId === 'bed-stuy' && s.player && s.activeMissionId === 'bed-stuy-m1') { setReady(true); return }
+    loadHood('bed-stuy').then((h) => {
       const m = h.missions[0]
-      // Seed one demo planting (same spot as the VR scene) so the 'Unlock & follow' step is not empty
-      const demo = s.plantings.length ? {} : { plantings: [{ id: 'pl-demo', missionId: m.id, hoodId: 'belleville', type: 'flowers' as const, plantId: 'knautia', plantName: 'Field scabious', latin: 'Knautia arvensis', name: 'Bee Corner Parmentier', lat: m.lat, lon: m.lon, addr: m.addr, partner: city('paris').demoPartners[0], score: 85, createdAt: Date.now() }], monthsAhead: 3 }
-      set({ onboarded: true, city: 'paris', hoodId: 'belleville', player: [m.lat - 0.00012, m.lon], activeMissionId: m.id, ...demo })
+      const c = candidates(m)
+      const tree = c.options.find((o) => o.id === c.correctId)!
+      // Seed one demo tree (same spot as the VR scene) so the 'Unlock & follow' step is not empty
+      const demo = s.plantings.length ? {} : { plantings: [{ id: 'pl-demo', missionId: m.id, hoodId: 'bed-stuy', type: 'tree' as const, plantId: tree.id, plantName: tree.common, latin: tree.latin, name: 'Lafayette Shade Tree', lat: m.lat, lon: m.lon, addr: m.addr, partner: city('nyc').demoPartners[0], score: 85, createdAt: Date.now() }], monthsAhead: 14 }
+      set({ onboarded: true, city: 'nyc', hoodId: 'bed-stuy', player: [m.lat - 0.00012, m.lon], activeMissionId: m.id, ...demo })
       setTimeout(() => setReady(true), 50)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,10 +66,10 @@ export default function Compare() {
             <thead><tr><th>Step</th><th>Mobile-web</th><th>VR premium</th></tr></thead>
             <tbody>
               <tr><td><b>Discover</b></td><td>3 onboarding slides</td><td>Immersive hub</td></tr>
-              <tr><td><b>Explore</b></td><td>2D/3D map: hot spots, trees, missions, neighbours' plantings</td><td>Tabletop diorama of the real streets (OpenStreetMap buildings, City trees)</td></tr>
-              <tr><td><b>Learn & play</b></td><td>Choose · water (rhythm game) · soil care, scored /100</td><td>Pick the plant from pedestals, water it, watch bees arrive</td></tr>
-              <tr><td><b>Unlock</b></td><td>Planting #n/{CONFIG.maxPlantings} screen + story to share</td><td>Immersive unlock with the same planting</td></tr>
-              <tr><td><b>Follow & share</b></td><td>Partner photos, community feed, challenges, profile 4/4</td><td>— (done on the phone)</td></tr>
+              <tr><td><b>Explore</b></td><td>2D/3D map: hot spots, street trees, missions</td><td>Tabletop diorama of real Bed-Stuy blocks (OpenStreetMap buildings, NYC Parks trees)</td></tr>
+              <tr><td><b>Learn & play</b></td><td>Choose the species · water 15–20 gal/week (rhythm game) · protect the pit, scored /100 (pass {CONFIG.passScore})</td><td>Pick the tree from pedestals, water it, feel the street cool down</td></tr>
+              <tr><td><b>Unlock</b></td><td>Name your tree · tree #n/{CONFIG.maxPlantings} screen + story to share</td><td>Immersive unlock with the same tree</td></tr>
+              <tr><td><b>Follow & share</b></td><td>3-year NGO follow-up, community feed, league of trees still alive, profile 4/4</td><td>— (done on the phone)</td></tr>
               <tr><td><b>Sponsor</b></td><td>Sponsor dashboard (quieter brand)</td><td>—</td></tr>
             </tbody>
           </table>
@@ -85,10 +88,10 @@ export default function Compare() {
           <h3 style={{ margin: '22px 0 10px' }}>Why it's not "buy a tree online"</h3>
           <div className="row wrap" style={{ gap: 8 }}>
             <span className="chip sun">Earned by learning, not bought</span>
-            <span className="chip leaf">In your street — go and see it</span>
+            <span className="chip leaf">On your block — go and see it</span>
             <span className="chip" style={{ background: 'var(--lilac)' }}>A neighbourhood community</span>
           </div>
-          <p className="small muted" style={{ marginTop: 14 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Trees, permits & cool islands: Ville de Paris open data (ODbL). Partners and sponsors shown are fictional.</p>
+          <p className="small muted" style={{ marginTop: 14 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Street trees, heat vulnerability: NYC Open Data (NYC Parks, DOHMH). Buildings: OpenStreetMap (ODbL). Partners and sponsors shown are fictional.</p>
         </section>
       </div>
     </div>

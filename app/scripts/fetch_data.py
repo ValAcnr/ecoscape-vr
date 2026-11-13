@@ -261,7 +261,7 @@ def buildings(bbox):
         except Exception as exc:  # public mirrors are sometimes overloaded
             print("overpass mirror failed:", ep, exc)
     if data is None:
-        return None
+        return buildings_from_tiles(bbox)
     out = []
     for el in data.get("elements", []):
         g = el.get("geometry")
@@ -274,6 +274,48 @@ def buildings(bbox):
         except ValueError:
             h = 15
         out.append({"h": round(h, 1), "pts": [[round(p["lat"], 6), round(p["lon"], 6)] for p in g]})
+    return out
+
+
+def buildings_from_tiles(bbox, z=14):
+    """Fallback when every Overpass mirror is down: the same OSM buildings (ODbL) from the
+    OpenFreeMap vector tiles (OpenMapTiles 'building' layer, render_height). Needs `pip install mapbox-vector-tile`."""
+    try:
+        import mapbox_vector_tile
+    except ImportError:
+        return None
+    s, w, n, e = bbox
+    tj = get("https://tiles.openfreemap.org/planet")
+    url = tj["tiles"][0]
+    def tile(lat, lon):
+        x = (lon + 180) / 360 * 2 ** z
+        y = (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * 2 ** z
+        return int(x), int(y)
+    x0, y0 = tile(n, w)
+    x1, y1 = tile(s, e)
+    out = []
+    for tx in range(x0, x1 + 1):
+        for ty in range(y0, y1 + 1):
+            req = urllib.request.Request(url.format(z=z, x=tx, y=ty), headers={"User-Agent": "EcoScape-student-prototype/0.1"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                t = mapbox_vector_tile.decode(r.read())
+            layer = t.get("building")
+            if not layer:
+                continue
+            ext = layer.get("extent", 4096)
+            def ll(px, py):  # tile pixel (y up) -> lat, lon
+                lon = (tx + px / ext) / 2 ** z * 360 - 180
+                yy = ty + (ext - py) / ext
+                lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * yy / 2 ** z))))
+                return [round(lat, 6), round(lon, 6)]
+            for f in layer["features"]:
+                g = f["geometry"]
+                polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"] if g["type"] == "MultiPolygon" else []
+                for poly in polys:
+                    ring = [ll(px, py) for px, py in poly[0]]
+                    if len(ring) < 4 or not any(s < a < n and w < b < e for a, b in ring):
+                        continue
+                    out.append({"h": round(float(f["properties"].get("render_height") or 15), 1), "pts": ring})
     return out
 
 
@@ -294,16 +336,17 @@ if __name__ == "__main__":
     g = guide() if not only_vr else json.loads((OUT / "species-guide.json").read_text())
     (OUT / "species-guide.json").write_text(json.dumps(g, ensure_ascii=False, separators=(",", ":")))
     print("guide", len(g), "species")
-    # VR scene: ~350 m square around the first Belleville mission
-    bel = json.loads((OUT / "hood-belleville.json").read_text())
+    # VR scene: ~350 m square around the first Bed-Stuy mission (vr-belleville.json is kept for the hidden Paris version)
+    bel = json.loads((OUT / "hood-bed-stuy.json").read_text())
     m = bel["missions"][0]
     d = 0.0016
-    b = buildings([m["lat"] - d, m["lon"] - d * 1.5, m["lat"] + d, m["lon"] + d * 1.5])
+    dl = d / math.cos(math.radians(m["lat"]))  # same size in metres east-west
+    b = buildings([m["lat"] - d, m["lon"] - dl * 1.17, m["lat"] + d, m["lon"] + dl * 1.17])
     if b is None:
-        prev = OUT / "vr-belleville.json"
+        prev = OUT / "vr-bed-stuy.json"
         b = json.loads(prev.read_text())["buildings"] if prev.exists() else []
         print("Overpass unavailable: keeping previous buildings", len(b))
-    (OUT / "vr-belleville.json").write_text(json.dumps({"origin": [m["lat"], m["lon"]], "mission": m,
-        "buildings": b, "trees": [t for t in bel["trees"] if abs(t[0] - m["lat"]) < d and abs(t[1] - m["lon"]) < d * 1.5],
+    (OUT / "vr-bed-stuy.json").write_text(json.dumps({"origin": [m["lat"], m["lon"]], "mission": m,
+        "buildings": b, "trees": [t for t in bel["trees"] if abs(t[0] - m["lat"]) < d and abs(t[1] - m["lon"]) < dl * 1.17],
         "heat": bel["heat"]}, separators=(",", ":")))
     print("vr buildings", len(b))

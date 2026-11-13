@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Check, MapPin } from 'lucide-react'
-import { CITIES, type CityId } from '../config'
+import { CITIES, CONFIG, type CityId } from '../config'
 import { HOOD_SUMMARY, loadHood } from '../data/hoods'
 import { useGame } from '../state'
 import { TopBar } from '../components/Shell'
@@ -30,14 +30,14 @@ export default function Neighbourhood() {
     <div className="screen">
       <TopBar title="Where do you live?" />
       <div className="pad stack" style={{ paddingTop: 4 }}>
-        <div className="row" role="tablist" aria-label="City">
+        {CONFIG.showCityPicker && <div className="row" role="tablist" aria-label="City">
           {(Object.keys(CITIES) as CityId[]).map((id) => (
             <button key={id} role="tab" aria-selected={s.city === id} className={`chip ${s.city === id ? 'sun' : ''}`} onClick={() => set({ city: id, hoodId: null })}>
               {s.city === id && <Check size={14} />} {CITIES[id].label}
             </button>
           ))}
-        </div>
-        <p className="muted small">Pick your neighbourhood. Missions are real street spots, based on City open data.</p>
+        </div>}
+        <p className="muted small">Pick your New York neighbourhood. Missions are real street-tree pits, based on NYC Open Data.</p>
         {c.hoods.map((id) => {
           const h = HOOD_SUMMARY[id]
           const st = stats[id]

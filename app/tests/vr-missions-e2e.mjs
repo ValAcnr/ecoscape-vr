@@ -1,4 +1,4 @@
-// VR mini-game e2e: for every Belleville mission, the VR plants must equal the mobile plants;
+// VR mini-game e2e: for every Bed-Stuy mission, the VR trees must equal the mobile trees;
 // then click every plant (real mouse clicks on the 3D pedestals), water, validate, reach the unlock scene.
 // Usage: node tests/vr-missions-e2e.mjs <baseUrl>
 import { chromium } from 'playwright'
@@ -7,13 +7,13 @@ const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftsha
 const PED_X = [447, 640, 833], PED_Y = 430 // pedestal positions at 1280×720 in the game view
 let fails = 0
 for (const order of [[0, 1, 2], [2, 1, 0]]) for (let i = 1; i <= 8; i++) {
-  const id = `belleville-m${i}`
+  const id = `bed-stuy-m${i}`
   const ctx = await b.newContext({ viewport: { width: 1280, height: 720 } })
   const p = await ctx.newPage()
   const errs = []; p.on('pageerror', (e) => errs.push(e.message))
   try {
     await p.goto(BASE)
-    await p.evaluate((m) => localStorage.setItem('ecoscape-state-v2', JSON.stringify({ onboarded: true, city: 'paris', hoodId: 'belleville', activeMissionId: m })), id)
+    await p.evaluate((m) => localStorage.setItem('ecoscape-state-v3', JSON.stringify({ onboarded: true, city: 'nyc', hoodId: 'bed-stuy', activeMissionId: m })), id)
     // mobile plants for this mission
     await p.goto(`${BASE}?t=${Date.now()}#/mission/${id}`); await p.waitForTimeout(1200) // full load so the seeded state is read
     await p.getByRole('button', { name: /^Start$/ }).click(); await p.waitForTimeout(300)
@@ -21,9 +21,9 @@ for (const order of [[0, 1, 2], [2, 1, 0]]) for (let i = 1; i <= 8; i++) {
     // VR plants
     await p.goto(`${BASE}#/vr/game`); await p.waitForTimeout(6500)
     const summary = await p.locator('#vr-scene-summary').textContent()
-    const vr = summary.match(/Plants: (.*?)\./)?.[1]
+    const vr = summary.match(/Trees: (.*?)\./)?.[1]
     if (!summary.includes(id)) throw new Error(`VR plays another mission: ${summary}`)
-    if (vr !== mobile) throw new Error(`plants differ — mobile: ${mobile} / VR: ${vr}`)
+    if (vr !== mobile) throw new Error(`trees differ — mobile: ${mobile} / VR: ${vr}`)
     const steps = []
     for (const k of order) {
       const st = await p.locator('#vr-game-state').textContent()
@@ -37,7 +37,7 @@ for (const order of [[0, 1, 2], [2, 1, 0]]) for (let i = 1; i <= 8; i++) {
     if (!(await p.locator('#vr-game-state').textContent()).startsWith('Step: done')) throw new Error('watering did not complete')
     await p.mouse.click(372, 443); await p.waitForTimeout(2500)
     if (!p.url().includes('#/vr/unlock')) throw new Error('no unlock scene, url ' + p.url())
-    const saved = await p.evaluate((m) => JSON.parse(localStorage.getItem('ecoscape-state-v2')).plantings.some((x) => x.missionId === m), id)
+    const saved = await p.evaluate((m) => JSON.parse(localStorage.getItem('ecoscape-state-v3')).plantings.some((x) => x.missionId === m), id)
     if (!saved) throw new Error('planting not saved')
     if (errs.length) throw new Error('page errors: ' + errs.join(' / '))
     console.log(`PASS vr ${id} order=${order.join('')} plants=[${vr}] :: ${steps.join(' → ')} → unlock`)

@@ -26,6 +26,8 @@ export interface GameState {
   plantings: Planting[]
   missionsPlayed: number
   missionsPassed: number
+  /** Maintenance (watering) missions won after the 4 trees were earned. */
+  careMissions: number
   bestScore: number
   badges: string[]
   shares: number
@@ -36,7 +38,7 @@ export interface GameState {
   activeMissionId: string | null
 }
 
-const KEY = 'ecoscape-state-v2' // v2: New York is the default city
+const KEY = 'ecoscape-state-v3' // v3: street trees only, New York only
 const fresh = (): GameState => ({
   onboarded: false,
   city: CONFIG.city,
@@ -45,6 +47,7 @@ const fresh = (): GameState => ({
   plantings: [],
   missionsPlayed: 0,
   missionsPassed: 0,
+  careMissions: 0,
   bestScore: 0,
   badges: [],
   shares: 0,
@@ -56,7 +59,8 @@ const fresh = (): GameState => ({
 function load(): GameState {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return { ...fresh(), ...JSON.parse(raw) }
+    // The city picker is hidden: always New York, whatever an older copy stored.
+    if (raw) return { ...fresh(), ...JSON.parse(raw), ...(CONFIG.showCityPicker ? {} : { city: CONFIG.city }) }
   } catch {
     /* private mode / blocked storage: run without persistence */
   }
@@ -105,12 +109,12 @@ export function useGame() {
 }
 
 export const BADGES: Record<string, { label: string; desc: string; color: string }> = {
-  first: { label: 'First Seed', desc: 'Unlocked your first real planting', color: 'var(--honey)' },
-  bee: { label: 'Bee Buddy', desc: 'Planted pollinator flowers', color: 'var(--honey)' },
-  shade: { label: 'Shade Maker', desc: 'Planted a street tree', color: '#a9bfac' },
-  grower: { label: 'Street Grower', desc: 'Planted an edible garden', color: '#a9bfac' },
+  first: { label: 'First Tree', desc: 'Earned your first real street tree', color: 'var(--honey)' },
+  shade: { label: 'Shade Maker', desc: 'Picked a large-canopy tree for a big pit', color: '#a9bfac' },
   perfect: { label: 'Green Thumb', desc: 'Scored 90+ in a mission', color: 'var(--lilac)' },
-  water: { label: 'Water Wise', desc: 'Perfect watering rhythm', color: '#bcdcff' },
-  sharer: { label: 'Storyteller', desc: 'Shared a planting story', color: 'var(--petal)' },
-  full: { label: 'Four Seasons', desc: 'Unlocked all 4 plantings', color: 'var(--leaf)' },
+  water: { label: 'Water Wise', desc: '15–20 gallons a week, all season', color: '#d9e2c7' },
+  sharer: { label: 'Storyteller', desc: 'Shared your tree’s story', color: 'var(--petal)' },
+  full: { label: 'Four Trees', desc: 'Earned all 4 street trees', color: 'var(--leaf)' },
+  keeper: { label: 'Tree Keeper', desc: 'Won a maintenance (watering) mission', color: '#d9bfa2' },
+  guardian: { label: 'Block Guardian', desc: 'Won 5 maintenance missions', color: '#8fa996' },
 }

@@ -1,7 +1,15 @@
-# Brand — working notes
+# Brand — EcoScape
 
-**Status: provisional, waiting for the team vote** (directions page: https://valacnr.github.io/ecoscape-vr/).
+**Status: adopted.** Brand board: `design/directions/index.html` (published at `/brand/`).
 
-- **Lead direction (Valentin's preference):** B "Bloom" for the player experience: honey yellow, ink, leaf green, lilac, petal pink; Bricolage Grotesque + DM Sans; playful, game-first tone.
-- **Sponsor space:** a quieter treatment inspired by A "Canopy" (forest green, sand, Fraunces + Inter, data-first tone) so that the B2B view reads as credible.
-- To be frozen only after the team has voted. The full design system (tokens, components, /styleguide page) comes in phase 4.
+## Colours
+- **Primary:** Forest Canopy `#1B603A` · Leaf Sage `#A9BFAC` · Urban Beige `#F2E8D5` · Clay Terracotta `#CDA88B`
+- **Secondary:** Moss Dew `#D9E2C7` · Soft Willow `#8FA996` · Dusty Peach `#E6C7B2` · Sandstone `#D9BFA2`
+- Text and outlines: deep green ink `#14281D`.
+
+## Typography
+- **Titles:** Bricolage Grotesque (500 / 700 / 800)
+- **Text:** DM Sans (400 / 500 / 700)
+
+## Tone
+Friendly and game-first for players; the sponsor space uses the same palette in a quieter layout.

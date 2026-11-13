@@ -7,7 +7,7 @@ import { PlantArt } from '../components/Art'
 
 function HeatArt() {
   return (
-    <svg viewBox="0 0 320 300" role="img" aria-label="A hot, paved street with few plants">
+    <svg viewBox="0 0 320 300" role="img" aria-label="A hot, paved street with no trees">
       <rect width="320" height="300" rx="28" fill="#eadfc8" />
       <circle cx="250" cy="62" r="34" fill="#cda88b" stroke="#14281d" strokeWidth="3" />
       <g stroke="#14281d" strokeWidth="3" strokeLinecap="round"><path d="M250 12v10M250 102v10M200 62h10M290 62h10M215 27l7 7M278 90l7 7M215 97l7-7M278 34l7-7" /></g>
@@ -24,7 +24,7 @@ function HeatArt() {
 
 function EarnArt() {
   return (
-    <svg viewBox="0 0 320 300" role="img" aria-label="Phone with a mini-game, arrow to a real planting">
+    <svg viewBox="0 0 320 300" role="img" aria-label="Phone with a mini-game, arrow to a real street tree">
       <rect width="320" height="300" rx="28" fill="#e3eadf" />
       <rect x="28" y="40" width="120" height="220" rx="22" fill="#14281d" />
       <rect x="38" y="52" width="100" height="196" rx="14" fill="#f2e8d5" />
@@ -47,7 +47,7 @@ export default function Onboarding() {
     {
       art: <HeatArt />,
       kicker: 'The problem',
-      title: <>Our streets are <span style={{ background: 'var(--petal)', padding: '0 4px' }}>too hot</span>, and bees go hungry.</>,
+      title: <>Our blocks are <span style={{ background: 'var(--petal)', padding: '0 4px' }}>too hot</span>, and short of trees.</>,
       body: (
         <>
           <p><b style={{ fontFamily: 'var(--f-display)', fontSize: 28 }}>{c.problem.stat}</b> {c.problem.caption}</p>
@@ -59,30 +59,30 @@ export default function Onboarding() {
       art: (
         <div style={{ position: 'relative', width: '100%' }}>
           <EarnArt />
-          <div style={{ position: 'absolute', right: '6%', top: '28%', width: '34%' }}><PlantArt type="flowers" stage={3} w={120} /></div>
+          <div style={{ position: 'absolute', right: '6%', top: '28%', width: '34%' }}><PlantArt stage={3} w={120} /></div>
         </div>
       ),
       kicker: 'Earn-to-Plant',
-      title: <>Don't buy a plant. <span style={{ background: 'var(--honey)', padding: '0 4px' }}>Earn it.</span></>,
-      body: <p>Play a short mission on a real spot near you: pick the right plant, water it well, care for the soil. Win, and a local association plants it <b>for real, on your street</b> — go and see it grow.</p>,
+      title: <>Don't buy a tree. <span style={{ background: 'var(--honey)', padding: '0 4px' }}>Earn it.</span></>,
+      body: <p>Play a short mission on a real tree pit near you: pick the right species, water it {CONFIG.water.minGal}–{CONFIG.water.maxGal} gallons a week, protect the pit. Win, name your tree, and a partner NGO plants it <b>for real, on your block</b> — then cares for it for {CONFIG.careYears} years.</p>,
     },
     {
       art: (
-        <svg viewBox="0 0 320 300" role="img" aria-label="Four seed slots">
+        <svg viewBox="0 0 320 300" role="img" aria-label="Four tree slots">
           <rect width="320" height="300" rx="28" fill="#e3eadf" />
           {[0, 1, 2, 3].map((k) => (
             <g key={k} transform={`translate(${40 + k * 64} 110)`}>
               <rect width="52" height="52" rx="16" fill={k < 2 ? '#cda88b' : '#fff'} stroke="#14281d" strokeWidth="3" />
-              {k < 2 && <path d="M26 40V20M26 28c-8 0-12-6-12-10 6 0 12 3 12 10zM26 24c6 0 10-5 10-9-6 0-10 3-10 9z" fill="#1b603a" stroke="#14281d" strokeWidth="2" />}
+              {k < 2 && <g stroke="#14281d" strokeWidth="2"><rect x="24" y="30" width="4" height="13" fill="#7a5533" /><circle cx="26" cy="22" r="12" fill="#1b603a" /></g>}
               <text x="26" y="80" textAnchor="middle" fontFamily="DM Sans" fontWeight="700" fontSize="14" fill="#14281d">{k + 1}</text>
             </g>
           ))}
-          <text x="160" y="235" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="22" fill="#14281d">4 seeds. Make them count.</text>
+          <text x="160" y="235" textAnchor="middle" fontFamily="Bricolage Grotesque" fontWeight="800" fontSize="22" fill="#14281d">4 trees. Make them count.</text>
         </svg>
       ),
       kicker: 'The rule',
-      title: <>{CONFIG.maxPlantings} real plantings per person.</>,
-      body: <p>Fewer plantings, better care: partners follow every one, and you get photo updates. After your 4th, keep playing to adopt and care for plants in your neighbourhood.</p>,
+      title: <>{CONFIG.maxPlantings} real street trees per person.</>,
+      body: <p>Fewer trees, better care: the partner NGO inspects every tree {CONFIG.inspectionsPerYear} times a year for {CONFIG.careYears} years, and you follow it in the app. After your 4th, you switch to maintenance mode: watering missions and badges. Neighbourhoods are ranked by trees still alive.</p>,
     },
   ]
   const sl = slides[i]

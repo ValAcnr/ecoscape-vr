@@ -17,17 +17,17 @@ export default function Profile() {
         <div className="card shadow stack" style={{ background: 'var(--honey)', gap: 10 }}>
           <div className="row between">
             <div>
-              <div className="tiny">Gardener of {s.hoodId ? HOOD_SUMMARY[s.hoodId]?.name : '—'}</div>
-              <h2>Real plantings</h2>
+              <div className="tiny">Tree keeper of {s.hoodId ? HOOD_SUMMARY[s.hoodId]?.name : '—'}</div>
+              <h2>Real street trees</h2>
             </div>
             <b style={{ fontFamily: 'var(--f-display)', fontSize: 40 }}>{s.plantings.length}/{CONFIG.maxPlantings}</b>
           </div>
-          <div className="seeds" aria-label={`${s.plantings.length} of ${CONFIG.maxPlantings} seeds used`}>
+          <div className="seeds" aria-label={`${s.plantings.length} of ${CONFIG.maxPlantings} trees earned`}>
             {Array.from({ length: CONFIG.maxPlantings }, (_, i) => (
-              <div key={i} className={`seed ${i < s.plantings.length ? 'on' : ''}`}>{i < s.plantings.length ? '🌱' : i + 1}</div>
+              <div key={i} className={`seed ${i < s.plantings.length ? 'on' : ''}`} title={s.plantings[i]?.name}>{i < s.plantings.length ? '🌳' : i + 1}</div>
             ))}
           </div>
-          <p className="small">{left > 0 ? `${left} seed${left > 1 ? 's' : ''} left — make them count.` : 'All 4 unlocked! Keep playing in adopt mode to care for neighbourhood plants.'}</p>
+          <p className="small"><b>{s.plantings.length}/{CONFIG.maxPlantings} trees earned.</b> {left > 0 ? `${left} tree${left > 1 ? 's' : ''} left to earn — make them count.` : `That's the maximum: you're in maintenance mode. Missions become watering missions for young neighbourhood trees, with care badges to win (${s.careMissions} won so far).`}</p>
         </div>
 
         <div className="row" style={{ gap: 8 }}>
@@ -46,8 +46,8 @@ export default function Profile() {
 
         <div className="card stack" style={{ gap: 10 }}>
           <h3>Not another "buy a tree" app</h3>
-          <div className="diff"><span className="ico"><GraduationCap size={18} /></span><p className="small"><b>You earn it by learning.</b> No payment: you pass a plant-care mission first.</p></div>
-          <div className="diff"><span className="ico" style={{ background: '#a9bfac' }}><Footprints size={18} /></span><p className="small"><b>It's in your street,</b> not on another continent. You can visit it.</p></div>
+          <div className="diff"><span className="ico"><GraduationCap size={18} /></span><p className="small"><b>You earn it by learning.</b> No payment: you pass a tree-care mission first.</p></div>
+          <div className="diff"><span className="ico" style={{ background: '#a9bfac' }}><Footprints size={18} /></span><p className="small"><b>It's on your block,</b> not on another continent. You can visit it, and a partner NGO looks after it for {CONFIG.careYears} years.</p></div>
           <div className="diff"><span className="ico" style={{ background: 'var(--lilac)' }}><Users size={18} /></span><p className="small"><b>A neighbourhood community:</b> feed, challenges, shared care.</p></div>
         </div>
 
@@ -60,13 +60,15 @@ export default function Profile() {
 
         <div className="card soft stack" style={{ gap: 8 }}>
           <span className="tiny muted">Prototype settings</span>
-          <div className="row" style={{ gap: 6 }}>
-            <span className="small">City:</span>
-            {(Object.keys(CITIES) as CityId[]).map((id) => (
-              <button key={id} className={`chip ${s.city === id ? 'sun' : ''}`} onClick={() => { set({ city: id, hoodId: null }); nav('/hood') }}>{CITIES[id].label}</button>
-            ))}
-          </div>
-          <button className="btn" onClick={() => { if (confirm('Reset the demo? Your plantings and badges will be cleared on this device.')) { reset(); nav('/welcome') } }}><RotateCcw size={16} /> Reset demo</button>
+          {CONFIG.showCityPicker ? (
+            <div className="row" style={{ gap: 6 }}>
+              <span className="small">City:</span>
+              {(Object.keys(CITIES) as CityId[]).map((id) => (
+                <button key={id} className={`chip ${s.city === id ? 'sun' : ''}`} onClick={() => { set({ city: id, hoodId: null }); nav('/hood') }}>{CITIES[id].label}</button>
+              ))}
+            </div>
+          ) : <span className="small">City: <b>{CITIES[CONFIG.city].label}</b></span>}
+          <button className="btn" onClick={() => { if (confirm('Reset the demo? Your trees and badges will be cleared on this device.')) { reset(); nav('/welcome') } }}><RotateCcw size={16} /> Reset demo</button>
           <p className="small muted">Your data stays on this device. Location is optional and never stored.</p>
         </div>
       </div>

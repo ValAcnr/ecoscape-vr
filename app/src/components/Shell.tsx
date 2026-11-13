@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Map, Newspaper, Sprout, UserRound } from 'lucide-react'
+import { Map, Newspaper, TreeDeciduous, UserRound } from 'lucide-react'
 import { CONFIG } from '../config'
 import { Logo } from './Art'
 
@@ -20,13 +20,13 @@ export function Shell({ children }: { children: ReactNode }) {
         <aside className="side">
           <div className="row"><Logo size={44} /><span className="tiny muted">Student prototype</span></div>
           <h2>EcoScape — Earn-to-Plant</h2>
-          <p>Learn to care for a plant, earn a real one on your street. This is the mobile-web version — open this page on your phone for the real experience.</p>
+          <p>Learn to care for a street tree, earn a real one on your block in New York. This is the mobile-web version — open this page on your phone for the real experience.</p>
           <div className="links">
             <Link className="btn honey" to="/vr">Open the VR premium version</Link>
             <Link className="btn" to="/compare">Mobile vs VR side by side</Link>
-            <a className="btn ghost" href={`${import.meta.env.BASE_URL}brand/`}>Brand directions</a>
+            <a className="btn ghost" href={`${import.meta.env.BASE_URL}brand/`}>Brand board</a>
           </div>
-          <p className="small muted" style={{ marginTop: 18 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Street trees, heat vulnerability: NYC Open Data (NYC Parks, DOHMH). Paris: Ville de Paris open data (ODbL). Partners and sponsors shown are fictional.</p>
+          <p className="small muted" style={{ marginTop: 18 }}>Demo data. Map © OpenStreetMap contributors · OpenFreeMap. Street trees, heat vulnerability: NYC Open Data (NYC Parks, DOHMH). Partners and sponsors shown are fictional.</p>
         </aside>
         <main className="phone">
           {CONFIG.showPrototypeRibbon && <div className="ribbon">PROTOTYPE</div>}
@@ -41,7 +41,7 @@ export function Tabs() {
   const items = [
     { to: '/map', label: 'Map', Icon: Map },
     { to: '/feed', label: 'Community', Icon: Newspaper },
-    { to: '/plantings', label: 'My plants', Icon: Sprout },
+    { to: '/plantings', label: 'My trees', Icon: TreeDeciduous },
     { to: '/profile', label: 'Profile', Icon: UserRound },
   ]
   return (

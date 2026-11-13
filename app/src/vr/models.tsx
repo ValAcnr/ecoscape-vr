@@ -1,65 +1,30 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import type { PlantingType } from '../config'
 import { C } from './ui3d'
-import vr from '../data/vr-belleville.json'
+import vr from '../data/vr-bed-stuy.json'
 
-/** Low-poly plant in the Bloom style (original geometry). */
-const PALETTES = [[C.lilac, C.petal, C.honey], ['#ffffff', '#e3eadf', '#e3eadf'], ['#e6c7b2', '#f2e8d5', '#cda88b']]
-export function Plant3D({ type, scale = 1, position, variant = 0 }: { type: PlantingType; scale?: number; position?: [number, number, number]; variant?: number }) {
-  const pal = PALETTES[variant % PALETTES.length]
-  const tall = variant === 1 ? 0.75 : variant === 2 ? 0.6 : 1
+/** Low-poly street tree in its pit (original geometry). variant: 0 round, 1 tall / conical, 2 wide and airy. */
+const CROWNS = [[C.leaf, '#279160'], ['#14482c', C.leaf], ['#8fa996', C.lilac]]
+export function Plant3D({ scale = 1, position, variant = 0 }: { type?: PlantingType; scale?: number; position?: [number, number, number]; variant?: number }) {
+  const v = ((variant % 3) + 3) % 3
+  const [c1, c2] = CROWNS[v]
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 0.04, 0]}><cylinderGeometry args={[0.14, 0.11, 0.08, 20]} /><meshStandardMaterial color="#8b6a43" /></mesh>
-      <mesh position={[0, 0.085, 0]}><cylinderGeometry args={[0.13, 0.13, 0.01, 20]} /><meshStandardMaterial color="#5a3f24" /></mesh>
-      {type === 'tree' ? (
-        <group>
-          <mesh position={[0, 0.25, 0]}><cylinderGeometry args={[0.025, 0.035, 0.32, 8]} /><meshStandardMaterial color="#7a5533" /></mesh>
-          <mesh position={[0, 0.48, 0]}><icosahedronGeometry args={[0.17, 0]} /><meshStandardMaterial color={C.leaf} flatShading /></mesh>
-          <mesh position={[0.1, 0.4, 0.04]}><icosahedronGeometry args={[0.11, 0]} /><meshStandardMaterial color="#1b603a" flatShading /></mesh>
-        </group>
-      ) : type === 'edible' ? (
-        <group>
-          {[[-0.05, 0.03], [0.05, -0.02], [0, 0.06], [0.03, 0.05]].map(([x, z], i) => (
-            <mesh key={i} position={[x, 0.16 + i * 0.02, z]} rotation={[0.3 * i, i, 0.4]}><sphereGeometry args={[0.06, 8, 6]} /><meshStandardMaterial color="#8fa996" flatShading /></mesh>
-          ))}
-          {[[0.07, 0.04], [-0.05, -0.05], [0.0, 0.09]].map(([x, z], i) => (
-            <mesh key={`t${i}`} position={[x, 0.2, z]}><sphereGeometry args={[0.03, 10, 8]} /><meshStandardMaterial color="#a9603e" /></mesh>
-          ))}
-        </group>
-      ) : (
-        <group>
-          {[[-0.06, 0, 0.26 * tall, pal[0]], [0.05, 0.03, 0.3 * tall, pal[1]], [0, -0.06, 0.22 * tall, pal[2]], [0.07, -0.05, 0.2 * tall, pal[0]], [-0.07, 0.06, 0.24 * tall, pal[2]]].map(([x, z, h, col], i) => (
-            <group key={i} position={[x as number, 0, z as number]}>
-              <mesh position={[0, (h as number) / 2 + 0.08, 0]}><cylinderGeometry args={[0.006, 0.006, h as number, 5]} /><meshStandardMaterial color="#1b603a" /></mesh>
-              <mesh position={[0, (h as number) + 0.08, 0]}><sphereGeometry args={[0.035, 10, 8]} /><meshStandardMaterial color={col as string} /></mesh>
-            </group>
-          ))}
-        </group>
-      )}
-    </group>
-  )
-}
-
-/** A bee orbiting a point (pollinators — never a hive). */
-export function Bee({ radius = 0.3, speed = 1, height = 0.4, phase = 0 }: { radius?: number; speed?: number; height?: number; phase?: number }) {
-  const g = useRef<THREE.Group>(null)
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime() * speed + phase
-    if (g.current) {
-      g.current.position.set(Math.cos(t) * radius, height + Math.sin(t * 3) * 0.04, Math.sin(t) * radius)
-      g.current.rotation.y = -t
-    }
-  })
-  return (
-    <group ref={g}>
-      <mesh scale={[1, 0.8, 1.4]}><sphereGeometry args={[0.03, 12, 10]} /><meshStandardMaterial color={C.honey} /></mesh>
-      <mesh position={[0, 0, 0.01]} scale={[1.02, 0.82, 0.25]}><sphereGeometry args={[0.03, 12, 10]} /><meshStandardMaterial color={C.ink} /></mesh>
-      <mesh position={[0.025, 0.025, 0]} rotation={[0, 0, 0.5]}><sphereGeometry args={[0.02, 8, 6]} /><meshStandardMaterial color="#ffffff" transparent opacity={0.8} /></mesh>
-      <mesh position={[-0.025, 0.025, 0]} rotation={[0, 0, -0.5]}><sphereGeometry args={[0.02, 8, 6]} /><meshStandardMaterial color="#ffffff" transparent opacity={0.8} /></mesh>
+      {/* tree pit: sidewalk edge + soil + mulch */}
+      <mesh position={[0, 0.04, 0]}><boxGeometry args={[0.3, 0.08, 0.3]} /><meshStandardMaterial color="#d9bfa2" /></mesh>
+      <mesh position={[0, 0.085, 0]}><boxGeometry args={[0.24, 0.012, 0.24]} /><meshStandardMaterial color="#5a3f24" /></mesh>
+      <mesh position={[0, 0.27, 0]}><cylinderGeometry args={[0.022, 0.032, 0.36, 8]} /><meshStandardMaterial color="#7a5533" /></mesh>
+      {v === 0 && (<>
+        <mesh position={[0, 0.5, 0]}><icosahedronGeometry args={[0.17, 0]} /><meshStandardMaterial color={c1} flatShading /></mesh>
+        <mesh position={[0.1, 0.42, 0.04]}><icosahedronGeometry args={[0.11, 0]} /><meshStandardMaterial color={c2} flatShading /></mesh>
+      </>)}
+      {v === 1 && <mesh position={[0, 0.58, 0]}><coneGeometry args={[0.14, 0.52, 7]} /><meshStandardMaterial color={c1} flatShading /></mesh>}
+      {v === 2 && (<>
+        <mesh position={[0, 0.48, 0]} scale={[1.5, 0.6, 1.5]}><icosahedronGeometry args={[0.15, 0]} /><meshStandardMaterial color={c1} flatShading /></mesh>
+        <mesh position={[0, 0.56, 0]} scale={[1, 0.6, 1]}><icosahedronGeometry args={[0.12, 0]} /><meshStandardMaterial color={c2} flatShading /></mesh>
+      </>)}
     </group>
   )
 }

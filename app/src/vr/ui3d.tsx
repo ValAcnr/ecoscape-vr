@@ -10,7 +10,7 @@ export const C = {
 }
 export const FONTS = { display: displayFont, body: bodyFont, bold: boldFont }
 
-/** Flat rounded panel with an ink "shadow" — the Bloom card, in 3D. */
+/** Flat rounded panel with an ink "shadow" — the app card, in 3D. */
 export function Panel({ w, h, color = C.paper, children, position, rotation }: { w: number; h: number; color?: string; children?: ReactNode; position?: [number, number, number]; rotation?: [number, number, number] }) {
   return (
     <group position={position} rotation={rotation}>

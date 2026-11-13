@@ -1,12 +1,12 @@
-// End-to-end test of every mission, every plant, real clicks/taps from the map to the unlock screen.
+// End-to-end test of every mission, every tree species, real clicks/taps from the map to naming the tree and the unlock screen.
 // Usage: node tests/missions-e2e.mjs <baseUrl> <mobile|desktop> [hoods comma-separated]
-// For each mission, run A tries the plants in on-screen order (wrong ones first if they come first),
-// checks the error message for each wrong pick, then finishes; run B picks the right plant first.
+// For each mission, run A tries the species in on-screen order (wrong ones first if they come first),
+// checks the error message for each wrong pick, then finishes; run B picks the right species first.
 import { chromium } from 'playwright'
 
 const BASE = process.argv[2] ?? 'http://localhost:4173/ecoscape-vr/'
 const MODE = process.argv[3] ?? 'mobile'
-const HOODS = (process.argv[4] ?? 'belleville,goutte-dor,butte-aux-cailles,bed-stuy,harlem,east-harlem,washington-heights,lower-east-side,mott-haven,bushwick,sunset-park,jackson-heights').split(',')
+const HOODS = (process.argv[4] ?? 'bed-stuy,harlem,east-harlem,washington-heights,lower-east-side,mott-haven,bushwick,sunset-park,jackson-heights').split(',')
 const [FROM, TO] = (process.argv[5] ?? '1-8').split('-').map(Number) // mission range, 1-based (short batches)
 const CITY = { belleville: 'paris', 'goutte-dor': 'paris', 'butte-aux-cailles': 'paris', 'bed-stuy': 'nyc', 'harlem': 'nyc', 'east-harlem': 'nyc', 'washington-heights': 'nyc', 'lower-east-side': 'nyc', 'mott-haven': 'nyc', 'bushwick': 'nyc', 'sunset-park': 'nyc', 'jackson-heights': 'nyc' }
 
@@ -25,7 +25,7 @@ async function run(hood, idx, strategy) {
   const log = []
   try {
     await p.goto(BASE)
-    await p.evaluate(([h, c]) => localStorage.setItem('ecoscape-state-v2', JSON.stringify({ onboarded: true, city: c, hoodId: h })), [hood, CITY[hood]])
+    await p.evaluate(([h, c]) => localStorage.setItem('ecoscape-state-v3', JSON.stringify({ onboarded: true, city: c, hoodId: h })), [hood, CITY[hood]])
     await p.goto(`${BASE}#/map`); await p.reload()
     await p.waitForSelector('button.mk', { timeout: 25000 }); await p.waitForTimeout(1800)
     const marker = p.locator('button.mk').nth(idx)
@@ -60,9 +60,8 @@ async function run(hood, idx, strategy) {
     }
     if (!advanced) throw new Error('never reached the watering step')
 
-    // Watering: tap whenever moisture drops under the middle of the green band
-    const band = await p.locator('.gauge .band').evaluate((el) => [parseFloat(el.style.bottom), parseFloat(el.style.height)])
-    const target = band[0] + band[1] * 0.45
+    // Watering: tap whenever the weekly water (gallons) drops under 16 gal (green zone 15–20)
+    const target = 16
     const btn = p.getByRole('button', { name: /water/i }).last()
     const t0 = Date.now()
     while (Date.now() - t0 < 14000) {
@@ -72,11 +71,17 @@ async function run(hood, idx, strategy) {
       await p.waitForTimeout(140)
     }
     await p.waitForSelector('button.check', { timeout: 5000 })
-    // Care: pick the two right actions (mulch + the type-specific one)
-    await press(p.locator('button.check').nth(0)); await press(p.locator('button.check').nth(2))
-    await press(p.getByRole('button', { name: /^Check$/ })); await p.waitForTimeout(200)
+    // Pit care: pick the three right actions (mulch, weeding, no compaction)
+    for (const k of [0, 2, 4]) await press(p.locator('button.check').nth(k))
+    await press(p.getByRole('button', { name: /^Check/ })); await p.waitForTimeout(200)
     const score = await p.getByLabel('Score').innerText()
-    await press(p.getByRole('button', { name: /See my result/ })); await p.waitForTimeout(900)
+    await press(p.getByRole('button', { name: /See my result/ })); await p.waitForTimeout(600)
+    // Name the tree: a rude name is refused, a friendly one is accepted
+    await p.getByLabel('Tree name').fill('Big Sh!t')
+    await press(p.getByRole('button', { name: /Name my tree/ })); await p.waitForTimeout(200)
+    if (!/friendly/i.test(await p.getByRole('alert').innerText().catch(() => ''))) throw new Error('rude name not refused')
+    await p.getByLabel('Tree name').fill(`Test Tree ${idx + 1}`)
+    await press(p.getByRole('button', { name: /Name my tree/ })); await p.waitForTimeout(900)
     const url = p.url()
     if (!/#\/unlock\//.test(url)) throw new Error(`no unlock screen (score ${score}, url ${url})`)
     log.push(`unlock ${score}`)
@@ -86,7 +91,7 @@ async function run(hood, idx, strategy) {
   } catch (e) {
     failures++
     console.log(`FAIL ${MODE} ${hood} #${idx + 1} [${strategy}] :: ${log.join(' → ')} :: ${e.message.split('\n')[0]}`)
-    await p.screenshot({ path: `/tmp/claude-0/-root/c7fb2921-f883-436a-9120-f4e945b254cb/scratchpad/fail-${MODE}-${hood}-${idx}-${strategy}.png` }).catch(() => {})
+    await p.screenshot({ path: `/tmp/fail-${MODE}-${hood}-${idx}-${strategy}.png` }).catch(() => {})
     return log
   } finally {
     runs++
