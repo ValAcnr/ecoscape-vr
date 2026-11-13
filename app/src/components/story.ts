@@ -39,7 +39,7 @@ export async function makeStory(p: Planting, hoodName: string, index: number, ma
   g.font = '700 46px "DM Sans", sans-serif'
   g.fillText('Not bought. Earned. 🌱', 90, 1700)
   g.font = '500 36px "DM Sans", sans-serif'
-  g.fillText('valacnr.github.io/ecoscape-vr', 90, 1770)
+  g.fillText((location.host + import.meta.env.BASE_URL).replace(/\/$/, ''), 90, 1770)
   return new Promise((res) => c.toBlob((b) => res(b), 'image/png'))
 }
 
